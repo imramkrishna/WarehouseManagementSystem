@@ -6,6 +6,8 @@ import { Input } from '../ui/Input';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { Package, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 export function LoginForm() {
   const [email, setEmail] = useState('admin@warehouse.com');
@@ -15,7 +17,7 @@ export function LoginForm() {
   const { login, user } = useAuth();
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
-
+ 
   useEffect(() => {
     if (user) {
       navigate('/'); // Redirect to home/dashboard if already logged in

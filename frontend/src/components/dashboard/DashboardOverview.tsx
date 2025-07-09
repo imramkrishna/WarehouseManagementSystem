@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { Card } from '../ui/Card';
 import {
   Package,
@@ -10,8 +10,11 @@ import {
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 export function DashboardOverview() {
+  const navigate = useNavigate();
   const stats = [
     {
       title: 'Total Inventory',
@@ -98,7 +101,15 @@ export function DashboardOverview() {
         return <Package className="w-4 h-4 text-blue-500" />;
     }
   };
-
+ 
+  useEffect(() => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    const accessToken = localStorage.getItem('accessToken');
+    if(!refreshToken || !accessToken){
+      navigate('/login')
+    }
+    return;
+  },[])
   return (
     <div className="space-y-6">
       {/* Header */}

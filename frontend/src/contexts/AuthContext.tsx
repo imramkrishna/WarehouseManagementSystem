@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI
-console.log(BACKEND_URI)
+import { useNavigate } from 'react-router-dom';
 interface User {
   refreshToken: string
 }
@@ -26,21 +26,18 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
+  async function generateAccessToken(refreshToken: string) {
+    const response = await axios.post(`${BACKEND_URI}/auth/generateAccessToken`, { refreshToken })
+    localStorage.setItem('accessToken', response.data.token)
+  }
   useEffect(() => {
-    // Check for stored auth token
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // Simulate API call to validate token
-      setTimeout(() => {
-        setUser({
-          refreshToken: token
-        });
-        setLoading(false);
-      }, 1000);
-    } else {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
       setLoading(false);
+      return;
     }
+    generateAccessToken(refreshToken);
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -50,6 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (response) {
       localStorage.setItem('refreshToken', response.data.token);
+      setUser({refreshToken:response.data.token})
+      setLoading(false);
     } else {
       throw new Error('Invalid credentials');
     }

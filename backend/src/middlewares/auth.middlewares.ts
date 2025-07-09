@@ -2,6 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import pool from "../utils/database";
 import { StatusCodes } from "../interfaces/statusCodes";
 import jwt from "jsonwebtoken";
+declare global {
+    namespace Express {
+        interface Request {
+            profile: any;
+        }
+    }
+}
 export const tokenVerification = (req: Request, res: Response, next: NextFunction) => {
     const authheader = req.headers["authorization"];
     const token = authheader && authheader.split(" ")[1];
@@ -19,6 +26,7 @@ export const tokenVerification = (req: Request, res: Response, next: NextFunctio
         res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
         return;
     }
+    req.profile = decoded;
     next();
 };
 export const checkIfUserExists = async (req: Request, res: Response, next: NextFunction) => {
