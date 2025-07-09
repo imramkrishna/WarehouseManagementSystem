@@ -8,7 +8,7 @@ const limiter = rateLimit({
     message: "Too many requests, please try again later."
 });
 const router = Router();
-router.use(limiter)
+router.use(limiter);
 router.post("/register", checkIfUserExists, register);
 router.post("/login", login);
 router.get("/generateAccessToken", accessToken);
