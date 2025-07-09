@@ -22,4 +22,42 @@ export const register = async(req: Request, res: Response) => {
 
 export const login = async(req: Request, res: Response) => {
     const { email, password } = req.body;
+    if(!email || !password){
+        res.status(StatusCodes.BAD_REQUEST).json({message:"All fields are required"});
+        return;
+    }
+    const query = `SELECT id FROM users WHERE email = $1 AND password = $2`;
+    const result = await pool.query(query, [email,password]);
+    if(result.rows.length === 0){
+        res.status(StatusCodes.BAD_REQUEST).json({message:"User not found"});
+        return;
+    }
+    const secret=process.env.JWT_SECRET;
+    if(!secret){
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message:"Internal server error"});
+        return;
+    }
+    const id=result.rows[0].id;
+    const refreshToken=jwt.sign(id,secret,{expiresIn:"7d"});
+    res.status(StatusCodes.OK).json({refreshToken});
+};
+export const accessToken = async(req: Request, res: Response) => {
+    const { refreshToken } = req.body;
+    if(!refreshToken){
+        res.status(StatusCodes.BAD_REQUEST).json({message:"Refresh token is required"});
+        return;
+    }
+    const secret=process.env.JWT_SECRET;
+    if(!secret){
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message:"Internal server error"});
+        return;
+    }
+    const decoded=jwt.verify(refreshToken,secret);
+    if(!decoded){
+        res.status(StatusCodes.UNAUTHORIZED).json({message:"Invalid refresh token"});
+        return;
+    }
+    const id=decoded;
+    const token=jwt.sign(id,secret,{expiresIn:"1h"});
+    res.status(StatusCodes.OK).json({token});
 };
