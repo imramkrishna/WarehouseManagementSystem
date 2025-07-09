@@ -19,10 +19,10 @@ export function LoginForm() {
   const navigate = useNavigate();
  
   useEffect(() => {
-    if (user) {
-      navigate('/'); // Redirect to home/dashboard if already logged in
+    if (!isLoading && user) {
+      navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

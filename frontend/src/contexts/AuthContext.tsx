@@ -26,39 +26,68 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
   async function generateAccessToken(refreshToken: string) {
-    const response = await axios.post(`${BACKEND_URI}/auth/generateAccessToken`, { refreshToken })
-    localStorage.setItem('accessToken', response.data.token)
-  }
-  useEffect(() => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      setLoading(false);
-      return;
+    try {
+      const response = await axios.post(`${BACKEND_URI}/auth/generateAccessToken`, { refreshToken });
+      localStorage.setItem('accessToken', response.data.token);
+      return response.data.token;
+    } catch (error) {
+      console.error('Failed to generate access token:', error);
+      // Clear invalid tokens
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('accessToken');
+      setUser(null);
+      return null;
     }
-    generateAccessToken(refreshToken);
-    setLoading(false);
+  }
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      const accessToken = localStorage.getItem('accessToken');
+
+      if (!refreshToken) {
+        setLoading(false);
+        return;
+      }
+
+      // Set user immediately if we have a refresh token
+      setUser({ refreshToken });
+
+      if (!accessToken) {
+        await generateAccessToken(refreshToken);
+      }
+
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
-    const response = await axios.post(`${BACKEND_URI}/auth/login`, { email, password })
+    try {
+      const response = await axios.post(`${BACKEND_URI}/auth/login`, { email, password });
 
-
-    if (response) {
-      localStorage.setItem('refreshToken', response.data.token);
-      setUser({refreshToken:response.data.token})
-      setLoading(false);
-    } else {
+      if (response.data.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        setUser({ refreshToken: response.data.refreshToken });
+      } else {
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       throw new Error('Invalid credentials');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('refreshToken');
-    localStorage.removeItem("accessToken")
+    localStorage.removeItem('accessToken');
   };
 
   const value = {

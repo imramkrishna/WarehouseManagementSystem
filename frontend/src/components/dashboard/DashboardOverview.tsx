@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Card } from '../ui/Card';
 import {
   Package,
@@ -101,15 +101,7 @@ export function DashboardOverview() {
         return <Package className="w-4 h-4 text-blue-500" />;
     }
   };
- 
-  useEffect(() => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    const accessToken = localStorage.getItem('accessToken');
-    if(!refreshToken || !accessToken){
-      navigate('/login')
-    }
-    return;
-  },[])
+
   return (
     <div className="space-y-6">
       {/* Header */}

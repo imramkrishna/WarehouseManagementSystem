@@ -59,6 +59,6 @@ export const accessToken = async (req: Request, res: Response) => {
         return;
     }
     const id = decoded;
-    const token = jwt.sign(id, secret, { expiresIn: "1h" });
+    const token = jwt.sign(id, secret);
     res.status(StatusCodes.OK).json({ token });
 };
