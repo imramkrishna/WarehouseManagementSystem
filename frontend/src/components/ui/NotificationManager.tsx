@@ -34,7 +34,7 @@ export function NotificationManager() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed z-50 space-y-2 top-4 right-4">
       {notifications.map((notification) => (
         <div
           key={notification.id}
@@ -47,7 +47,7 @@ export function NotificationManager() {
             <div className="flex-shrink-0">
               {getIcon(notification.type)}
             </div>
-            <div className="ml-3 w-0 flex-1">
+            <div className="flex-1 w-0 ml-3">
               <p className="text-sm font-medium text-gray-900">
                 {notification.title}
               </p>
@@ -55,7 +55,7 @@ export function NotificationManager() {
                 {notification.message}
               </p>
             </div>
-            <div className="ml-4 flex-shrink-0">
+            <div className="flex-shrink-0 ml-4">
               <button
                 onClick={() => removeNotification(notification.id)}
                 className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"

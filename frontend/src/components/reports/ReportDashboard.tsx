@@ -77,28 +77,28 @@ export function ReportDashboard() {
   const getTypeColor = (type: ReportData['type']) => {
     switch (type) {
       case 'inventory':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'sales':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'financial':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'operational':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const getStatusColor = (status: ReportData['status']) => {
     switch (status) {
       case 'ready':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'generating':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'error':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
@@ -124,10 +124,10 @@ export function ReportDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-gray-600">Generate and view comprehensive business reports</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reports & Analytics</h1>
+          <p className="text-gray-600 dark:text-gray-300">Generate and view comprehensive business reports</p>
         </div>
         <div className="flex items-center space-x-3">
           <Button variant="outline" className="flex items-center space-x-2">
@@ -142,81 +142,81 @@ export function ReportDashboard() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">$124,580</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">$124,580</p>
             </div>
-            <div className="bg-green-100 p-3 rounded-full">
-              <DollarSign className="w-6 h-6 text-green-600" />
+            <div className="p-3 bg-green-100 rounded-full dark:bg-green-900">
+              <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600">+12.5% from last month</span>
+          <div className="flex items-center mt-4 text-sm">
+            <TrendingUp className="w-4 h-4 mr-1 text-green-500 dark:text-green-300" />
+            <span className="text-green-600 dark:text-green-400">+12.5% from last month</span>
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Orders Processed</p>
-              <p className="text-2xl font-bold text-gray-900">1,248</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Orders Processed</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">1,248</p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <ShoppingCart className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600">+8.2% from last month</span>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Inventory Turnover</p>
-              <p className="text-2xl font-bold text-gray-900">6.4x</p>
-            </div>
-            <div className="bg-purple-100 p-3 rounded-full">
-              <Package className="w-6 h-6 text-purple-600" />
+            <div className="p-3 bg-blue-100 rounded-full dark:bg-blue-900">
+              <ShoppingCart className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-            <span className="text-red-600">-2.1% from last month</span>
+          <div className="flex items-center mt-4 text-sm">
+            <TrendingUp className="w-4 h-4 mr-1 text-green-500 dark:text-green-300" />
+            <span className="text-green-600 dark:text-green-400">+8.2% from last month</span>
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Efficiency Score</p>
-              <p className="text-2xl font-bold text-gray-900">94.2%</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Inventory Turnover</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">6.4x</p>
             </div>
-            <div className="bg-orange-100 p-3 rounded-full">
-              <BarChart3 className="w-6 h-6 text-orange-600" />
+            <div className="p-3 bg-purple-100 rounded-full dark:bg-purple-900">
+              <Package className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600">+3.8% from last month</span>
+          <div className="flex items-center mt-4 text-sm">
+            <TrendingDown className="w-4 h-4 mr-1 text-red-500 dark:text-red-300" />
+            <span className="text-red-600 dark:text-red-400">-2.1% from last month</span>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Efficiency Score</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">94.2%</p>
+            </div>
+            <div className="p-3 bg-orange-100 rounded-full dark:bg-orange-900">
+              <BarChart3 className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            </div>
+          </div>
+          <div className="flex items-center mt-4 text-sm">
+            <TrendingUp className="w-4 h-4 mr-1 text-green-500 dark:text-green-300" />
+            <span className="text-green-600 dark:text-green-400">+3.8% from last month</span>
           </div>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Inventory Trends</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Trends</h3>
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
@@ -228,15 +228,15 @@ export function ReportDashboard() {
           <div className="space-y-4">
             {chartData.slice(-4).map((data, index) => (
               <div key={data.month} className="flex items-center space-x-4">
-                <div className="w-12 text-sm text-gray-600">{data.month}</div>
+                <div className="w-12 text-sm text-gray-600 dark:text-gray-300">{data.month}</div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-700">Inventory</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Inventory</span>
                     <span className="text-sm font-medium">{data.inventory.toLocaleString()}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full h-2 bg-gray-200 rounded-full">
                     <div 
-                      className="bg-blue-500 h-2 rounded-full" 
+                      className="h-2 bg-blue-500 rounded-full" 
                       style={{ width: `${(data.inventory / 16000) * 100}%` }}
                     />
                   </div>
@@ -248,7 +248,7 @@ export function ReportDashboard() {
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Sales Performance</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sales Performance</h3>
             <Button variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-1" />
               Refresh
@@ -258,15 +258,15 @@ export function ReportDashboard() {
           <div className="space-y-4">
             {chartData.slice(-4).map((data, index) => (
               <div key={data.month} className="flex items-center space-x-4">
-                <div className="w-12 text-sm text-gray-600">{data.month}</div>
+                <div className="w-12 text-sm text-gray-600 dark:text-gray-300">{data.month}</div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-700">Sales</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Sales</span>
                     <span className="text-sm font-medium">${data.sales.toLocaleString()}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full h-2 bg-gray-200 rounded-full">
                     <div 
-                      className="bg-green-500 h-2 rounded-full" 
+                      className="h-2 bg-green-500 rounded-full" 
                       style={{ width: `${(data.sales / 14000) * 100}%` }}
                     />
                   </div>
@@ -280,15 +280,15 @@ export function ReportDashboard() {
       {/* Reports List */}
       <Card>
         <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h3 className="text-lg font-semibold text-gray-900">Available Reports</h3>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Available Reports</h3>
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <Filter className="w-4 h-4 text-gray-400" />
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Types</option>
                   <option value="inventory">Inventory</option>
@@ -310,9 +310,9 @@ export function ReportDashboard() {
                     {getTypeIcon(report.type)}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-lg font-medium text-gray-900 mb-1">{report.title}</h4>
-                    <p className="text-sm text-gray-600 mb-2">{report.description}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <h4 className="mb-1 text-lg font-medium text-gray-900 dark:text-gray-100">{report.title}</h4>
+                    <p className="mb-2 text-sm text-gray-600 dark:text-gray-300">{report.description}</p>
+                    <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                       <span>Last generated: {report.lastGenerated}</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
                         {report.status.charAt(0).toUpperCase() + report.status.slice(1)}

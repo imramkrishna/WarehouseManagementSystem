@@ -1,14 +1,14 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { 
-  Package, 
-  Search, 
-  Filter, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Package,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Trash2,
   AlertTriangle,
   TrendingUp,
   TrendingDown,
@@ -86,10 +86,10 @@ export function InventoryList() {
 
   const filteredInventory = mockInventory.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.sku.toLowerCase().includes(searchTerm.toLowerCase());
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
-    
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -213,7 +213,7 @@ export function InventoryList() {
               />
             </div>
           </div>
-          
+
           <div className="flex space-x-4">
             <select
               value={selectedCategory}
@@ -225,7 +225,7 @@ export function InventoryList() {
               <option value="Furniture">Furniture</option>
               <option value="Accessories">Accessories</option>
             </select>
-            
+
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -236,7 +236,7 @@ export function InventoryList() {
               <option value="low-stock">Low Stock</option>
               <option value="out-of-stock">Out of Stock</option>
             </select>
-            
+
             <Button variant="outline" className="flex items-center space-x-2">
               <Filter className="w-4 h-4" />
               <span>More Filters</span>
@@ -279,8 +279,8 @@ export function InventoryList() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredInventory.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <tr key={item.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-gray-100">
                     <div className="flex items-center">
                       <div className="flex items-center justify-center w-10 h-10 mr-3 bg-gray-200 rounded-lg">
                         <Package className="w-5 h-5 text-gray-500" />
@@ -291,26 +291,25 @@ export function InventoryList() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
                     {item.sku}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
                     {item.category}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.quantity}</div>
-                    <div className="text-sm text-gray-500">Min: {item.minStock}</div>
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
+                    {item.quantity}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                       {getStatusIcon(item.status)}
                       <span className="ml-1 capitalize">{item.status.replace('-', ' ')}</span>
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
                     {item.location}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
                     ${item.price.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
@@ -331,7 +330,7 @@ export function InventoryList() {
             </tbody>
           </table>
         </div>
-        
+
         {filteredInventory.length === 0 && (
           <div className="py-12 text-center">
             <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />

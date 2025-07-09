@@ -1,12 +1,11 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  Home, 
-  Package, 
-  ShoppingCart, 
-  Warehouse, 
-  Users, 
-  BarChart3, 
+import {
+  Home,
+  Package,
+  ShoppingCart,
+  Warehouse,
+  Users,
+  BarChart3,
   Settings,
   X,
   TrendingUp
@@ -33,8 +32,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 z-40 lg:hidden"
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 dark:bg-opacity-70 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -47,30 +46,29 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       `}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
               <Package className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white">WMS</span>
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 transition-colors rounded-lg lg:hidden hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
-        <nav className="mt-6 px-4">
+        <nav className="px-4 mt-6">
           <div className="space-y-2">
             {navigation.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.href}
                 className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-r-2 border-blue-600 dark:border-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  `flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${location.pathname === item.path
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-r-2 border-blue-600 dark:border-blue-400'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`
                 }
                 onClick={() => onClose()}
@@ -83,9 +81,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Quick stats */}
-        <div className="mt-8 px-4">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Quick Stats</h3>
+        <div className="px-4 mt-8">
+          <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+            <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">Quick Stats</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Total Items</span>

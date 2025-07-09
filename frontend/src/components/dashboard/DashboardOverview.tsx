@@ -1,11 +1,11 @@
 import React from 'react';
 import { Card } from '../ui/Card';
-import { 
-  Package, 
-  ShoppingCart, 
-  Warehouse, 
-  Users, 
-  TrendingUp, 
+import {
+  Package,
+  ShoppingCart,
+  Warehouse,
+  Users,
+  TrendingUp,
   TrendingDown,
   AlertTriangle,
   CheckCircle
@@ -104,29 +104,28 @@ export function DashboardOverview() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome back! Here's what's happening in your warehouse.</p>
+        <p className="mt-2 text-gray-600">Welcome back! Here's what's happening in your warehouse.</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <Card key={index} className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{stat.title}</p>
+                <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                 <div className="flex items-center mt-2">
                   {stat.trend === 'up' ? (
-                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                    <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
                   ) : (
-                    <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
+                    <TrendingDown className="w-4 h-4 mr-1 text-red-500" />
                   )}
-                  <span className={`text-sm font-medium ${
-                    stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {stat.change}
                   </span>
-                  <span className="text-sm text-gray-500 ml-1">vs last month</span>
+                  <span className="ml-1 text-sm text-gray-500">vs last month</span>
                 </div>
               </div>
               <div className={`p-3 rounded-full ${getStatColor(stat.color)}`}>
@@ -137,11 +136,11 @@ export function DashboardOverview() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Recent Activity */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Recent Activity</h3>
             <div className="space-y-4">
               {recentActivities.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
@@ -150,7 +149,7 @@ export function DashboardOverview() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900">{activity.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    <p className="mt-1 text-xs text-gray-500">{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -161,25 +160,25 @@ export function DashboardOverview() {
         {/* Quick Actions */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Package className="w-6 h-6 text-blue-600 mb-2" />
+              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
+                <Package className="w-6 h-6 mb-2 text-blue-600" />
                 <p className="text-sm font-medium text-gray-900">Add Inventory</p>
                 <p className="text-xs text-gray-500">Add new items</p>
               </button>
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <ShoppingCart className="w-6 h-6 text-green-600 mb-2" />
+              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
+                <ShoppingCart className="w-6 h-6 mb-2 text-green-600" />
                 <p className="text-sm font-medium text-gray-900">Create Order</p>
                 <p className="text-xs text-gray-500">New purchase order</p>
               </button>
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Warehouse className="w-6 h-6 text-purple-600 mb-2" />
+              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
+                <Warehouse className="w-6 h-6 mb-2 text-purple-600" />
                 <p className="text-sm font-medium text-gray-900">Manage Warehouse</p>
                 <p className="text-xs text-gray-500">Configure locations</p>
               </button>
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Users className="w-6 h-6 text-orange-600 mb-2" />
+              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
+                <Users className="w-6 h-6 mb-2 text-orange-600" />
                 <p className="text-sm font-medium text-gray-900">Add Supplier</p>
                 <p className="text-xs text-gray-500">New supplier info</p>
               </button>
