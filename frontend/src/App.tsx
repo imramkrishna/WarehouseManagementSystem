@@ -14,6 +14,7 @@ import { SupplierList } from './components/suppliers/SupplierList';
 import { ReportDashboard } from './components/reports/ReportDashboard';
 import { UserProfile } from './components/auth/UserProfile';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
+import { Outlet } from 'react-router-dom';
 import './App.css';
 
 function App() {
@@ -25,21 +26,24 @@ function App() {
             <Router>
               <Routes>
                 <Route path="/login" element={<LoginForm />} />
-                <Route path="/" element={
-                  <AuthGuard>
-                    <AppLayout>
-                      <Routes>
-                        <Route index element={<DashboardOverview />} />
-                        <Route path="inventory/*" element={<InventoryList />} />
-                        <Route path="orders/*" element={<OrderList />} />
-                        <Route path="warehouses/*" element={<WarehouseList />} />
-                        <Route path="suppliers/*" element={<SupplierList />} />
-                        <Route path="reports/*" element={<ReportDashboard />} />
-                        <Route path="profile" element={<UserProfile />} />
-                      </Routes>
-                    </AppLayout>
-                  </AuthGuard>
-                } />
+                <Route
+                  path="/"
+                  element={
+                    <AuthGuard>
+                      <AppLayout>
+                        <Outlet />
+                      </AppLayout>
+                    </AuthGuard>
+                  }
+                >
+                  <Route index element={<DashboardOverview />} />
+                  <Route path="inventory/*" element={<InventoryList />} />
+                  <Route path="orders/*" element={<OrderList />} />
+                  <Route path="warehouses/*" element={<WarehouseList />} />
+                  <Route path="suppliers/*" element={<SupplierList />} />
+                  <Route path="reports/*" element={<ReportDashboard />} />
+                  <Route path="profile" element={<UserProfile />} />
+                </Route>
               </Routes>
             </Router>
           </NotificationProvider>
