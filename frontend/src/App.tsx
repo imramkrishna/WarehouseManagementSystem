@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { AppLayout } from './components/layout/AppLayout';
+import { LoginForm } from './components/auth/LoginForm';
+import { AuthGuard } from './components/auth/AuthGuard';
+import { DashboardOverview } from './components/dashboard/DashboardOverview';
+import { InventoryList } from './components/inventory/InventoryList';
+import { OrderList } from './components/orders/OrderList';
+import { WarehouseList } from './components/warehouse/WarehouseList';
+import { SupplierList } from './components/suppliers/SupplierList';
+import { ReportDashboard } from './components/reports/ReportDashboard';
+import { UserProfile } from './components/auth/UserProfile';
+import { ErrorBoundary } from './components/layout/ErrorBoundary';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <Router>
+              <Routes>
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/" element={
+                  <AuthGuard>
+                    <AppLayout>
+                      <Routes>
+                        <Route index element={<DashboardOverview />} />
+                        <Route path="inventory/*" element={<InventoryList />} />
+                        <Route path="orders/*" element={<OrderList />} />
+                        <Route path="warehouses/*" element={<WarehouseList />} />
+                        <Route path="suppliers/*" element={<SupplierList />} />
+                        <Route path="reports/*" element={<ReportDashboard />} />
+                        <Route path="profile" element={<UserProfile />} />
+                      </Routes>
+                    </AppLayout>
+                  </AuthGuard>
+                } />
+              </Routes>
+            </Router>
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
 }
 
-export default App
+export default App;
