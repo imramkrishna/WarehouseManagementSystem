@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
 import { Card } from '../ui/Card';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Package,
   ShoppingCart,
@@ -11,14 +12,58 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 
 export function DashboardOverview() {
   const navigate = useNavigate();
+  const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
+  const accessToken = localStorage.getItem('accessToken');
+  interface DashboardStats {
+    inventory: number;
+    orders: number;
+    warehouses: number;
+    suppliers: number;
+  }
+
+  const [profile, setProfile] = useState<any>();
+  const [data, setData] = useState<DashboardStats | undefined>();
+  const [loading, setLoading] = useState<boolean>(true);
+  async function getData() {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${BACKEND_URI}/profile/dashboard`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+      console.log(response.data);
+      setProfile(response.data.profile);
+      setData(response.data.stats);
+      setLoading(false);
+    } catch (error) {
+      setLoading(true)
+      console.error('Error fetching dashboard data:', error);
+    }
+  }
+  useEffect(() => {
+    getData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">{<LoadingSpinner />}</div>
+        <div className="ml-4 text-gray-500">Loading dashboard...</div>
+      </div>
+    );
+  }
+
   const stats = [
     {
       title: 'Total Inventory',
-      value: '12,450',
+      value: data?.inventory || '0',
       change: '+12%',
       trend: 'up',
       icon: Package,
@@ -34,7 +79,7 @@ export function DashboardOverview() {
     },
     {
       title: 'Warehouses',
-      value: '8',
+      value: data?.warehouses || '0',
       change: '+2',
       trend: 'up',
       icon: Warehouse,
@@ -42,7 +87,7 @@ export function DashboardOverview() {
     },
     {
       title: 'Active Suppliers',
-      value: '24',
+      value: data?.suppliers || '0',
       change: '+5%',
       trend: 'up',
       icon: Users,
