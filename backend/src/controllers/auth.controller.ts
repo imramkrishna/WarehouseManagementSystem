@@ -26,12 +26,18 @@ export const login = async (req: Request, res: Response) => {
         res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
         return;
     }
-    const query = `SELECT * FROM users WHERE email = $1 AND password = $2`;
-    const result = await pool.query(query, [email, password]);
+    const query = `SELECT * FROM users WHERE email = $1`;
+    const result = await pool.query(query, [email]);
     if (result.rows.length === 0) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: "User not found" });
         return;
     }
+    const isMatched = await bcrypt.compare(password, result.rows[0].password);
+    if (!isMatched) {
+        res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid credentials" });
+        return;
+    }
+
     const secret = process.env.JWT_SECRET;
 
     if (!secret) {
