@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI
-import { useNavigate } from 'react-router-dom';
+
 interface User {
   refreshToken: string
+  accessToken?: string
 }
 
 interface AuthContextType {
@@ -31,6 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await axios.post(`${BACKEND_URI}/auth/generateAccessToken`, { refreshToken });
       localStorage.setItem('accessToken', response.data.token);
+
+      setUser({ refreshToken, accessToken: response.data.token })
       return response.data.token;
     } catch (error) {
       console.error('Failed to generate access token:', error);
@@ -44,22 +47,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const refreshToken = localStorage.getItem('refreshToken');
-      const accessToken = localStorage.getItem('accessToken');
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        const accessToken = localStorage.getItem('accessToken');
 
-      if (!refreshToken) {
+        if (!refreshToken) {
+          setLoading(false);
+          return;
+        }
+
+        // Set user immediately if we have a refresh token
+        setUser({ refreshToken });
+
+        // Generate access token if missing
+        if (!accessToken) {
+          const newAccessToken = await generateAccessToken(refreshToken);
+          if (!newAccessToken) {
+            // If generateAccessToken failed, user is already set to null
+            setLoading(false);
+            return;
+          }
+        }
+
         setLoading(false);
-        return;
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setUser(null);
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('accessToken');
+        setLoading(false);
       }
-
-      // Set user immediately if we have a refresh token
-      setUser({ refreshToken });
-
-      if (!accessToken) {
-        await generateAccessToken(refreshToken);
-      }
-
-      setLoading(false);
     };
 
     checkAuth();
@@ -73,6 +90,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.data.refreshToken) {
         localStorage.setItem('refreshToken', response.data.refreshToken);
         setUser({ refreshToken: response.data.refreshToken });
+
+
+        await generateAccessToken(response.data.refreshToken);
       } else {
         throw new Error('Invalid credentials');
       }

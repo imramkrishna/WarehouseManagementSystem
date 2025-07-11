@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import pool from "../utils/database";
 import { StatusCodes } from "../interfaces/statusCodes";
 export const dashboard = async (req: Request, res: Response) => {
-    const { profile } = req.profile;
+    const profile = req.profile;
+    console.log("Profile in dashboard:", profile);
     const warehouseCount = await pool.query('SELECT COUNT(*) FROM warehouses');
     const supplierCount = await pool.query('SELECT COUNT(*) FROM suppliers');
     const inventoryCount = await pool.query('SELECT COUNT(*) FROM inventory');

@@ -18,7 +18,7 @@ import { LoadingSpinner } from '../ui/LoadingSpinner';
 export function DashboardOverview() {
   const navigate = useNavigate();
   const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
-  const accessToken = localStorage.getItem('accessToken');
+
   interface DashboardStats {
     inventory: number;
     orders: number;
@@ -29,9 +29,9 @@ export function DashboardOverview() {
   const [profile, setProfile] = useState<any>();
   const [data, setData] = useState<DashboardStats | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
+  const accessToken = localStorage.getItem('accessToken');
   async function getData() {
     try {
-      setLoading(true);
       const response = await axios.get(`${BACKEND_URI}/profile/dashboard`, {
         headers: {
           'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export function DashboardOverview() {
       setData(response.data.stats);
       setLoading(false);
     } catch (error) {
-      setLoading(true)
+      setLoading(false)
       console.error('Error fetching dashboard data:', error);
     }
   }
@@ -63,7 +63,7 @@ export function DashboardOverview() {
   const stats = [
     {
       title: 'Total Inventory',
-      value: data?.inventory || '0',
+      value: data?.inventory || '16',
       change: '+12%',
       trend: 'up',
       icon: Package,
@@ -71,7 +71,7 @@ export function DashboardOverview() {
     },
     {
       title: 'Pending Orders',
-      value: '156',
+      value: data?.suppliers || '156',
       change: '-8%',
       trend: 'down',
       icon: ShoppingCart,
