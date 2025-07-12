@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -14,7 +14,8 @@ import {
   TrendingDown,
   MoreVertical
 } from 'lucide-react';
-
+import axios from 'axios';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 interface InventoryItem {
   id: string;
   name: string;
@@ -80,6 +81,9 @@ const mockInventory: InventoryItem[] = [
 ];
 
 export function InventoryList() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URI;
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(mockInventory);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -105,6 +109,33 @@ export function InventoryList() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+  async function fetchInventory() {
+    try {
+      const response = await axios.get(`${backendUrl}/profile/inventory`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      });;
+      console.log('Fetched inventory:', response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    fetchInventory();
+    setLoading(false);
+  }, []);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">{<LoadingSpinner />}</div>
+        <div className="ml-4 text-gray-500">Loading inventory...</div>
+      </div>
+    );
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {

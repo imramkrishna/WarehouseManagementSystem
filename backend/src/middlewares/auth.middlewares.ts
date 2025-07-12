@@ -27,7 +27,6 @@ export const tokenVerification = (req: Request, res: Response, next: NextFunctio
         return;
     }
     req.profile = decoded;
-    console.log("Decoded profile:", req.profile);
     next();
 };
 export const checkIfUserExists = async (req: Request, res: Response, next: NextFunction) => {

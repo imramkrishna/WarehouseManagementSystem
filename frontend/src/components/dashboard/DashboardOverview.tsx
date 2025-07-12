@@ -38,7 +38,7 @@ export function DashboardOverview() {
           Authorization: `Bearer ${accessToken}`
         }
       })
-      console.log(response.data);
+
       setProfile(response.data.profile);
       setData(response.data.stats);
       setLoading(false);
