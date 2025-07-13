@@ -83,37 +83,37 @@ export function InventoryList() {
   };
   async function fetchInventory() {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await axios.get(`${backendUrl}/profile/inventory`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`
         }
-      });;
-      console.log('Fetched inventory:', response.data);
+      });
+
       setInventoryItems(response.data.items);
-      fetchItems();
       setLoading(false);
     } catch (error) {
       console.error('Error fetching inventory:', error);
       setLoading(false);
     }
   }
-  function fetchItems() {
-    if (loading) return;
-    if (inventoryItems.length === 0) {
-      return;
-    }
-    const lowStockItems = inventoryItems.filter(item => item.quantity_available <= 30);
-    const outOfStockItems = inventoryItems.filter(item => item.quantity_available === 0);
-    const totalPrice = inventoryItems.reduce((total, item) => total + parseFloat(item.unit_price as unknown as string) * item.quantity_available, 0);
-    setLowStockItems(lowStockItems);
-    setOutOfStockItems(outOfStockItems);
-    setTotalInventoryValue(totalPrice);
-  }
   useEffect(() => {
     fetchInventory();
   }, []);
+  useEffect(() => {
+    if (inventoryItems.length > 0) {
+      const lowStockItems = inventoryItems.filter(item => item.quantity_available <= item.minimum_stock_level);
+      const outOfStockItems = inventoryItems.filter(item => item.quantity_available === 0);
+      const totalPrice = inventoryItems.reduce((total, item) =>
+        total + parseFloat(item.unit_price.toString()) * item.quantity_available, 0
+      );
+
+      setLowStockItems(lowStockItems);
+      setOutOfStockItems(outOfStockItems);
+      setTotalInventoryValue(totalPrice);
+    }
+  }, [inventoryItems]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

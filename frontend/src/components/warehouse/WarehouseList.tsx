@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -17,76 +17,41 @@ import {
   MoreVertical,
   Building
 } from 'lucide-react';
+import axios from 'axios';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 interface WarehouseData {
-  id: string;
+  id: number;
   name: string;
-  code: string;
-  location: string;
-  manager: string;
-  capacity: number;
-  currentStock: number;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip_code: string;
+  phone: string;
+  email: string;
+  warehouse_type: 'distribution' | 'storage' | 'fulfillment';
   status: 'active' | 'inactive' | 'maintenance';
-  type: 'distribution' | 'storage' | 'fulfillment';
-  lastUpdated: string;
+  total_capacity: number;
+  available_capacity: number;
+  manager_id: number;
+  created_at: string;
+  updated_at: string;
+  created_by: number;
 }
 
-const mockWarehouses: WarehouseData[] = [
-  {
-    id: '1',
-    name: 'Main Distribution Center',
-    code: 'MDC-001',
-    location: 'New York, NY',
-    manager: 'John Smith',
-    capacity: 10000,
-    currentStock: 8500,
-    status: 'active',
-    type: 'distribution',
-    lastUpdated: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'West Coast Fulfillment',
-    code: 'WCF-002',
-    location: 'Los Angeles, CA',
-    manager: 'Sarah Johnson',
-    capacity: 7500,
-    currentStock: 6200,
-    status: 'active',
-    type: 'fulfillment',
-    lastUpdated: '2024-01-14'
-  },
-  {
-    id: '3',
-    name: 'Regional Storage Hub',
-    code: 'RSH-003',
-    location: 'Chicago, IL',
-    manager: 'Mike Davis',
-    capacity: 5000,
-    currentStock: 3800,
-    status: 'maintenance',
-    type: 'storage',
-    lastUpdated: '2024-01-13'
-  },
-  {
-    id: '4',
-    name: 'East Coast Distribution',
-    code: 'ECD-004',
-    location: 'Atlanta, GA',
-    manager: 'Lisa Wilson',
-    capacity: 8000,
-    currentStock: 7100,
-    status: 'active',
-    type: 'distribution',
-    lastUpdated: '2024-01-15'
-  }
-];
-
 export function WarehouseList() {
-  const [warehouses] = useState<WarehouseData[]>(mockWarehouses);
+  const [warehouses, setWarehouses] = useState<WarehouseData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [totalCapacity, setTotalCapacity] = useState<number>(0);
+  const [totalStock, setTotalStock] = useState<number>(0);
+  const [totalAvailable, setTotalAvailable] = useState<number>(0);
+  const [totalUsed, setTotalUsed] = useState<number>(0);
+  const [totalUtilization, setTotalUtilization] = useState<number>(0);
 
   const getStatusColor = (status: WarehouseData['status']) => {
     switch (status) {
@@ -101,7 +66,7 @@ export function WarehouseList() {
     }
   };
 
-  const getTypeColor = (type: WarehouseData['type']) => {
+  const getTypeColor = (type: WarehouseData['warehouse_type']) => {
     switch (type) {
       case 'distribution':
         return 'bg-blue-100 text-blue-800';
@@ -126,18 +91,59 @@ export function WarehouseList() {
 
   const filteredWarehouses = warehouses.filter(warehouse => {
     const matchesSearch = warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      warehouse.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      warehouse.location.toLowerCase().includes(searchTerm.toLowerCase());
+      warehouse.zip_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      warehouse.address.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || warehouse.status === statusFilter;
-    const matchesType = typeFilter === 'all' || warehouse.type === typeFilter;
+    const matchesType = typeFilter === 'all' || warehouse.warehouse_type === typeFilter;
 
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const totalCapacity = warehouses.reduce((sum, w) => sum + w.capacity, 0);
-  const totalStock = warehouses.reduce((sum, w) => sum + w.currentStock, 0);
   const activeWarehouses = warehouses.filter(w => w.status === 'active').length;
+  async function fetchWarehouses() {
+    try {
+      const response = await axios.get(`${BACKEND_URI}/profile/warehouses`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      });
+      console.log(response.data)
+      setWarehouses(response.data.warehouses);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching warehouses:', error);
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    fetchWarehouses();
+  }, []);
+  // Remove the problematic calculations from the component body
+  // Replace with:
+  useEffect(() => {
+    if (warehouses.length > 0) {
+      const TotalCapacity = warehouses.reduce((total, warehouse) => total + warehouse.total_capacity, 0);
+      const TotalStock = warehouses.reduce((total, warehouse) => total + (warehouse.total_capacity - warehouse.available_capacity), 0);
+      const TotalAvailable = warehouses.reduce((total, warehouse) => total + warehouse.available_capacity, 0);
+      const TotalUsed = TotalStock;
+      const TotalUtilization = TotalUsed / TotalCapacity * 100;
 
+      setTotalCapacity(TotalCapacity);
+      setTotalStock(TotalStock);
+      setTotalAvailable(TotalAvailable);
+      setTotalUsed(TotalUsed);
+      setTotalUtilization(TotalUtilization);
+    }
+  }, [warehouses]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">{<LoadingSpinner />}</div>
+        <div className="ml-4 text-gray-500">Loading inventory...</div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -266,7 +272,6 @@ export function WarehouseList() {
       {/* Warehouses Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredWarehouses.map((warehouse) => {
-          const capacityPercentage = getCapacityPercentage(warehouse.currentStock, warehouse.capacity);
 
           return (
             <Card key={warehouse.id} className="p-6 transition-shadow hover:shadow-lg">
@@ -277,7 +282,7 @@ export function WarehouseList() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{warehouse.name}</h3>
-                    <p className="text-sm text-gray-500">{warehouse.code}</p>
+                    <p className="text-sm text-gray-500">{warehouse.zip_code}</p>
                   </div>
                 </div>
                 <Button variant="ghost" size="sm">
@@ -288,41 +293,41 @@ export function WarehouseList() {
               <div className="space-y-3">
                 <div className="flex items-center text-sm text-gray-600">
                   <MapPin className="w-4 h-4 mr-2" />
-                  {warehouse.location}
+                  {warehouse.address}
                 </div>
 
                 <div className="flex items-center text-sm text-gray-600">
                   <Users className="w-4 h-4 mr-2" />
-                  Manager: {warehouse.manager}
+                  Manager: {warehouse.manager_id}
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(warehouse.status)}`}>
                     {warehouse.status.charAt(0).toUpperCase() + warehouse.status.slice(1)}
                   </span>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(warehouse.type)}`}>
-                    {warehouse.type.charAt(0).toUpperCase() + warehouse.type.slice(1)}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(warehouse.warehouse_type)}`}>
+                    {warehouse.warehouse_type.charAt(0).toUpperCase() + warehouse.warehouse_type.slice(1)}
                   </span>
                 </div>
 
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Capacity Utilization</span>
-                    <span className={`text-sm font-medium ${getCapacityColor(capacityPercentage)}`}>
-                      {capacityPercentage}%
+                    <span className={`text-sm font-medium ${getCapacityColor(totalUtilization)}`}>
+                      {totalUtilization}%
                     </span>
                   </div>
                   <div className="w-full h-2 bg-gray-200 rounded-full">
                     <div
-                      className={`h-2 rounded-full ${capacityPercentage >= 90 ? 'bg-red-500' :
-                        capacityPercentage >= 75 ? 'bg-yellow-500' : 'bg-green-500'
+                      className={`h-2 rounded-full ${totalUtilization >= 90 ? 'bg-red-500' :
+                        totalUtilization >= 75 ? 'bg-yellow-500' : 'bg-green-500'
                         }`}
-                      style={{ width: `${capacityPercentage}%` }}
+                      style={{ width: `${totalUtilization}%` }}
                     />
                   </div>
                   <div className="flex justify-between mt-1 text-xs text-gray-500">
-                    <span>{warehouse.currentStock.toLocaleString()} used</span>
-                    <span>{warehouse.capacity.toLocaleString()} total</span>
+                    <span>{warehouse.available_capacity.toLocaleString()} used</span>
+                    <span>{warehouse.total_capacity.toLocaleString()} total</span>
                   </div>
                 </div>
 
