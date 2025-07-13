@@ -17,79 +17,51 @@ import {
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 interface InventoryItem {
-  id: string;
-  name: string;
+  id: number;
+  product_name: string;
   sku: string;
+  barcode: string;
+  description: string;
   category: string;
-  quantity: number;
-  minStock: number;
-  price: number;
+  brand: string;
+  quantity_available: number;
+  quantity_on_hand: number;
+  quantity_reserved: number;
+  minimum_stock_level: number;
+  maximum_stock_level: number;
+  reorder_point: number;
+  reorder_quantity: number;
+  unit_price: number;
+  cost_price: number;
+  unit_of_measure: string;
   location: string;
-  status: 'in-stock' | 'low-stock' | 'out-of-stock';
-  lastUpdated: string;
+  status: 'active' | 'inactive' | 'discontinued';
+  supplier_id: number;
+  warehouse_id: number;
+  batch_number: string;
+  expiry_date: string | null;
+  weight: string;
+  dimensions: string;
+  last_counted_date: string;
+  created_at: string;
+  updated_at: string;
+  created_by: number;
+  updated_by: number;
 }
-
-const mockInventory: InventoryItem[] = [
-  {
-    id: '1',
-    name: 'Wireless Headphones',
-    sku: 'WH-001',
-    category: 'Electronics',
-    quantity: 150,
-    minStock: 20,
-    price: 99.99,
-    location: 'A1-B2',
-    status: 'in-stock',
-    lastUpdated: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Office Chair',
-    sku: 'OC-002',
-    category: 'Furniture',
-    quantity: 8,
-    minStock: 10,
-    price: 249.99,
-    location: 'B3-C1',
-    status: 'low-stock',
-    lastUpdated: '2024-01-14'
-  },
-  {
-    id: '3',
-    name: 'Laptop Stand',
-    sku: 'LS-003',
-    category: 'Accessories',
-    quantity: 0,
-    minStock: 5,
-    price: 49.99,
-    location: 'C2-D3',
-    status: 'out-of-stock',
-    lastUpdated: '2024-01-13'
-  },
-  {
-    id: '4',
-    name: 'Bluetooth Speaker',
-    sku: 'BS-004',
-    category: 'Electronics',
-    quantity: 75,
-    minStock: 15,
-    price: 79.99,
-    location: 'A2-B1',
-    status: 'in-stock',
-    lastUpdated: '2024-01-15'
-  }
-];
 
 export function InventoryList() {
   const backendUrl = import.meta.env.VITE_BACKEND_URI;
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(mockInventory);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<InventoryItem[]>([]);
+  const [outOfStockItems, setOutOfStockItems] = useState<InventoryItem[]>([]);
+  const [totalInventoryValue, setTotalInventoryValue] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
-  const filteredInventory = mockInventory.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredInventory = inventoryItems.filter(item => {
+    const matchesSearch = item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
@@ -111,6 +83,7 @@ export function InventoryList() {
   };
   async function fetchInventory() {
     try {
+      setLoading(true)
       const response = await axios.get(`${backendUrl}/profile/inventory`, {
         headers: {
           'Content-Type': 'application/json',
@@ -118,15 +91,28 @@ export function InventoryList() {
         }
       });;
       console.log('Fetched inventory:', response.data);
+      setInventoryItems(response.data.items);
+      fetchItems();
       setLoading(false);
     } catch (error) {
       console.error('Error fetching inventory:', error);
       setLoading(false);
     }
   }
+  function fetchItems() {
+    if (loading) return;
+    if (inventoryItems.length === 0) {
+      return;
+    }
+    const lowStockItems = inventoryItems.filter(item => item.quantity_available <= 30);
+    const outOfStockItems = inventoryItems.filter(item => item.quantity_available === 0);
+    const totalPrice = inventoryItems.reduce((total, item) => total + parseFloat(item.unit_price as unknown as string) * item.quantity_available, 0);
+    setLowStockItems(lowStockItems);
+    setOutOfStockItems(outOfStockItems);
+    setTotalInventoryValue(totalPrice);
+  }
   useEffect(() => {
     fetchInventory();
-    setLoading(false);
   }, []);
   if (loading) {
     return (
@@ -170,7 +156,7 @@ export function InventoryList() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">1,247</p>
+              <p className="text-2xl font-bold text-gray-900">{inventoryItems.length}</p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
               <Package className="w-6 h-6 text-blue-600" />
@@ -186,7 +172,7 @@ export function InventoryList() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-              <p className="text-2xl font-bold text-yellow-600">23</p>
+              <p className="text-2xl font-bold text-yellow-600">{lowStockItems.length}</p>
             </div>
             <div className="p-3 bg-yellow-100 rounded-full">
               <AlertTriangle className="w-6 h-6 text-yellow-600" />
@@ -201,7 +187,7 @@ export function InventoryList() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-              <p className="text-2xl font-bold text-red-600">5</p>
+              <p className="text-2xl font-bold text-red-600">{outOfStockItems.length}</p>
             </div>
             <div className="p-3 bg-red-100 rounded-full">
               <TrendingDown className="w-6 h-6 text-red-600" />
@@ -216,7 +202,7 @@ export function InventoryList() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Value</p>
-              <p className="text-2xl font-bold text-gray-900">$124,580</p>
+              <p className="text-2xl font-bold text-gray-900">${totalInventoryValue}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
               <TrendingUp className="w-6 h-6 text-green-600" />
@@ -317,8 +303,8 @@ export function InventoryList() {
                         <Package className="w-5 h-5 text-gray-500" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-500">Updated {item.lastUpdated}</div>
+                        <div className="text-sm font-medium text-gray-900">{item.product_name}</div>
+                        <div className="text-sm text-gray-500">Updated {item.updated_at}</div>
                       </div>
                     </div>
                   </td>
@@ -329,7 +315,7 @@ export function InventoryList() {
                     {item.category}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
-                    {item.quantity}
+                    {item.quantity_available}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
@@ -341,7 +327,7 @@ export function InventoryList() {
                     {item.location}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
-                    ${item.price.toFixed(2)}
+                    ${item.unit_price}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                     <div className="flex items-center justify-end space-x-2">
