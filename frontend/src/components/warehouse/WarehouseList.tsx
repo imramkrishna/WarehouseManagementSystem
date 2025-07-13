@@ -51,7 +51,6 @@ export function WarehouseList() {
   const [totalStock, setTotalStock] = useState<number>(0);
   const [totalAvailable, setTotalAvailable] = useState<number>(0);
   const [totalUsed, setTotalUsed] = useState<number>(0);
-  const [totalUtilization, setTotalUtilization] = useState<number>(0);
 
   const getStatusColor = (status: WarehouseData['status']) => {
     switch (status) {
@@ -79,10 +78,6 @@ export function WarehouseList() {
     }
   };
 
-  const getCapacityPercentage = (current: number, capacity: number) => {
-    return Math.round((current / capacity) * 100);
-  };
-
   const getCapacityColor = (percentage: number) => {
     if (percentage >= 90) return 'text-red-600';
     if (percentage >= 75) return 'text-yellow-600';
@@ -107,7 +102,6 @@ export function WarehouseList() {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         }
       });
-      console.log(response.data)
       setWarehouses(response.data.warehouses);
       setLoading(false);
     } catch (error) {
@@ -118,21 +112,16 @@ export function WarehouseList() {
   useEffect(() => {
     fetchWarehouses();
   }, []);
-  // Remove the problematic calculations from the component body
-  // Replace with:
   useEffect(() => {
     if (warehouses.length > 0) {
       const TotalCapacity = warehouses.reduce((total, warehouse) => total + warehouse.total_capacity, 0);
       const TotalStock = warehouses.reduce((total, warehouse) => total + (warehouse.total_capacity - warehouse.available_capacity), 0);
       const TotalAvailable = warehouses.reduce((total, warehouse) => total + warehouse.available_capacity, 0);
       const TotalUsed = TotalStock;
-      const TotalUtilization = TotalUsed / TotalCapacity * 100;
-
       setTotalCapacity(TotalCapacity);
       setTotalStock(TotalStock);
       setTotalAvailable(TotalAvailable);
       setTotalUsed(TotalUsed);
-      setTotalUtilization(TotalUtilization);
     }
   }, [warehouses]);
 
@@ -140,7 +129,7 @@ export function WarehouseList() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-gray-500">{<LoadingSpinner />}</div>
-        <div className="ml-4 text-gray-500">Loading inventory...</div>
+        <div className="ml-4 text-gray-500">Loading warehouses...</div>
       </div>
     );
   }
@@ -272,7 +261,9 @@ export function WarehouseList() {
       {/* Warehouses Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredWarehouses.map((warehouse) => {
-
+          const totalUtilizationPercentage = Math.round(
+            ((warehouse.total_capacity - warehouse.available_capacity) / warehouse.total_capacity) * 100
+          );
           return (
             <Card key={warehouse.id} className="p-6 transition-shadow hover:shadow-lg">
               <div className="flex items-start justify-between mb-4">
@@ -313,16 +304,16 @@ export function WarehouseList() {
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Capacity Utilization</span>
-                    <span className={`text-sm font-medium ${getCapacityColor(totalUtilization)}`}>
-                      {totalUtilization}%
+                    <span className={`text-sm font-medium ${getCapacityColor(totalUtilizationPercentage)}`}>
+                      {totalUtilizationPercentage}%
                     </span>
                   </div>
                   <div className="w-full h-2 bg-gray-200 rounded-full">
                     <div
-                      className={`h-2 rounded-full ${totalUtilization >= 90 ? 'bg-red-500' :
-                        totalUtilization >= 75 ? 'bg-yellow-500' : 'bg-green-500'
+                      className={`h-2 rounded-full ${totalUtilizationPercentage >= 90 ? 'bg-red-500' :
+                        totalUtilizationPercentage >= 75 ? 'bg-yellow-500' : 'bg-green-500'
                         }`}
-                      style={{ width: `${totalUtilization}%` }}
+                      style={{ width: `${totalUtilizationPercentage}%` }}
                     />
                   </div>
                   <div className="flex justify-between mt-1 text-xs text-gray-500">
