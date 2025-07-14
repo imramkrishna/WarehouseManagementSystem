@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { AddSupplierForm } from '../addForms/addSupplier';
+
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Supplier {
   id: number;
@@ -51,6 +53,7 @@ export function SupplierList() {
   const [totalRating, setTotalRating] = useState<number>(0);
   const [averageRating, setAverageRating] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const getStatusColor = (status: Supplier['status']) => {
     switch (status) {
@@ -135,7 +138,10 @@ export function SupplierList() {
           <h1 className="text-2xl font-bold text-gray-900">Suppliers</h1>
           <p className="text-gray-600">Manage your supplier relationships and partnerships</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button
+          className="flex items-center space-x-2"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus className="w-4 h-4" />
           <span>Add Supplier</span>
         </Button>
@@ -325,6 +331,15 @@ export function SupplierList() {
           </div>
         </Card>
       )}
+
+      <AddSupplierForm
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        onSuccess={() => {
+          fetchSuppliers(); // Refresh the list
+          console.log('Supplier added successfully!');
+        }}
+      />
     </div>
   );
 }

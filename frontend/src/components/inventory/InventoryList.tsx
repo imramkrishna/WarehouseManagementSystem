@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { AddInventoryForm } from '../addForms/addInventory';
+
 interface InventoryItem {
   id: number;
   product_name: string;
@@ -59,6 +61,7 @@ export function InventoryList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const filteredInventory = inventoryItems.filter(item => {
     const matchesSearch = item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -144,7 +147,10 @@ export function InventoryList() {
           <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
           <p className="mt-2 text-gray-600">Manage your warehouse inventory and stock levels</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button
+          className="flex items-center space-x-2"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus className="w-4 h-4" />
           <span>Add Item</span>
         </Button>
@@ -356,6 +362,15 @@ export function InventoryList() {
           </div>
         )}
       </Card>
+
+      <AddInventoryForm
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        onSuccess={() => {
+          fetchInventory(); // Refresh the list
+          console.log('Inventory item added successfully!');
+        }}
+      />
     </div>
   );
 }

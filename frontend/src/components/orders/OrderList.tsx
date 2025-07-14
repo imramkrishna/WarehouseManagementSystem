@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { AddOrderForm } from '../addForms/addOrder';
+
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Order {
   id: number;
@@ -54,6 +56,7 @@ export function OrderList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState<boolean>(true);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {
@@ -149,7 +152,10 @@ export function OrderList() {
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
           <p className="text-gray-600">Manage and track all customer orders</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button
+          className="flex items-center space-x-2"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus className="w-4 h-4" />
           <span>New Order</span>
         </Button>
@@ -326,6 +332,15 @@ export function OrderList() {
           </table>
         </div>
       </Card>
+
+      <AddOrderForm
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        onSuccess={() => {
+          fetchOrders(); // Refresh the list
+          console.log('Order created successfully!');
+        }}
+      />
     </div>
   );
 }

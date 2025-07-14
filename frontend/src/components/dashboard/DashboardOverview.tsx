@@ -13,7 +13,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-
+// Import the form components
+import { AddInventoryForm } from '../addForms/addInventory';
+import { AddOrderForm } from '../addForms/addOrder';
+import { AddSupplierForm } from '../addForms/addSupplier';
 
 export function DashboardOverview() {
   const navigate = useNavigate();
@@ -29,7 +32,14 @@ export function DashboardOverview() {
   const [profile, setProfile] = useState<any>();
   const [data, setData] = useState<DashboardStats | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Add state for form modals
+  const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
+  const [showAddOrderForm, setShowAddOrderForm] = useState(false);
+  const [showAddSupplierForm, setShowAddSupplierForm] = useState(false);
+
   const accessToken = localStorage.getItem('accessToken');
+
   async function getData() {
     try {
       const response = await axios.get(`${BACKEND_URI}/profile/dashboard`, {
@@ -48,9 +58,26 @@ export function DashboardOverview() {
       console.error('Error fetching dashboard data:', error);
     }
   }
+
   useEffect(() => {
     getData();
   }, []);
+
+  // Success handlers to refresh dashboard data
+  const handleInventorySuccess = () => {
+    getData(); // Refresh dashboard data
+    console.log('Inventory item added successfully!');
+  };
+
+  const handleOrderSuccess = () => {
+    getData(); // Refresh dashboard data
+    console.log('Order created successfully!');
+  };
+
+  const handleSupplierSuccess = () => {
+    getData(); // Refresh dashboard data
+    console.log('Supplier added successfully!');
+  };
 
   if (loading) {
     return (
@@ -72,7 +99,7 @@ export function DashboardOverview() {
     },
     {
       title: 'Pending Orders',
-      value: data?.suppliers || '156',
+      value: data?.orders || '156',
       change: '-8%',
       trend: 'down',
       icon: ShoppingCart,
@@ -129,22 +156,22 @@ export function DashboardOverview() {
 
   const getStatColor = (color: string) => {
     const colors = {
-      blue: 'bg-blue-500',
-      green: 'bg-green-500',
-      purple: 'bg-purple-500',
-      orange: 'bg-orange-500'
+      blue: 'bg-blue-500 dark:bg-blue-600',
+      green: 'bg-green-500 dark:bg-green-600',
+      purple: 'bg-purple-500 dark:bg-purple-600',
+      orange: 'bg-orange-500 dark:bg-orange-600'
     };
-    return colors[color as keyof typeof colors] || 'bg-gray-500';
+    return colors[color as keyof typeof colors] || 'bg-gray-500 dark:bg-gray-600';
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />;
       case 'warning':
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+        return <AlertTriangle className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />;
       default:
-        return <Package className="w-4 h-4 text-blue-500" />;
+        return <Package className="w-4 h-4 text-blue-500 dark:text-blue-400" />;
     }
   };
 
@@ -152,8 +179,8 @@ export function DashboardOverview() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">Welcome back! Here's what's happening in your warehouse.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening in your warehouse.</p>
       </div>
 
       {/* Stats Grid */}
@@ -166,15 +193,15 @@ export function DashboardOverview() {
                 <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                 <div className="flex items-center mt-2">
                   {stat.trend === 'up' ? (
-                    <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                    <TrendingUp className="w-4 h-4 mr-1 text-green-500 dark:text-green-400" />
                   ) : (
-                    <TrendingDown className="w-4 h-4 mr-1 text-red-500" />
+                    <TrendingDown className="w-4 h-4 mr-1 text-red-500 dark:text-red-400" />
                   )}
-                  <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                     {stat.change}
                   </span>
-                  <span className="ml-1 text-sm text-gray-500">vs last month</span>
+                  <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">vs last month</span>
                 </div>
               </div>
               <div className={`p-3 rounded-full ${getStatColor(stat.color)}`}>
@@ -189,7 +216,7 @@ export function DashboardOverview() {
         {/* Recent Activity */}
         <Card>
           <div className="p-6">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Recent Activity</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
             <div className="space-y-4">
               {recentActivities.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
@@ -197,8 +224,8 @@ export function DashboardOverview() {
                     {getStatusIcon(activity.status)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900">{activity.message}</p>
-                    <p className="mt-1 text-xs text-gray-500">{activity.time}</p>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{activity.message}</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -209,32 +236,70 @@ export function DashboardOverview() {
         {/* Quick Actions */}
         <Card>
           <div className="p-6">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">Quick Actions</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
-                <Package className="w-6 h-6 mb-2 text-blue-600" />
-                <p className="text-sm font-medium text-gray-900">Add Inventory</p>
-                <p className="text-xs text-gray-500">Add new items</p>
+              {/* Add Inventory Button */}
+              <button
+                onClick={() => setShowAddInventoryForm(true)}
+                className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <Package className="w-6 h-6 mb-2 text-blue-600 dark:text-blue-400" />
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Add Inventory</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Add new items</p>
               </button>
-              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
-                <ShoppingCart className="w-6 h-6 mb-2 text-green-600" />
-                <p className="text-sm font-medium text-gray-900">Create Order</p>
-                <p className="text-xs text-gray-500">New purchase order</p>
+
+              {/* Create Order Button */}
+              <button
+                onClick={() => setShowAddOrderForm(true)}
+                className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <ShoppingCart className="w-6 h-6 mb-2 text-green-600 dark:text-green-400" />
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Create Order</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">New purchase order</p>
               </button>
-              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
-                <Warehouse className="w-6 h-6 mb-2 text-purple-600" />
-                <p className="text-sm font-medium text-gray-900">Manage Warehouse</p>
-                <p className="text-xs text-gray-500">Configure locations</p>
+
+              {/* Manage Warehouse Button */}
+              <button
+                onClick={() => navigate('/warehouses')}
+                className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <Warehouse className="w-6 h-6 mb-2 text-purple-600 dark:text-purple-400" />
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Manage Warehouse</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Configure locations</p>
               </button>
-              <button className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50">
-                <Users className="w-6 h-6 mb-2 text-orange-600" />
-                <p className="text-sm font-medium text-gray-900">Add Supplier</p>
-                <p className="text-xs text-gray-500">New supplier info</p>
+
+              {/* Add Supplier Button */}
+              <button
+                onClick={() => setShowAddSupplierForm(true)}
+                className="p-4 text-left transition-colors border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <Users className="w-6 h-6 mb-2 text-orange-600 dark:text-orange-400" />
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Add Supplier</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">New supplier info</p>
               </button>
             </div>
           </div>
         </Card>
       </div>
+
+      {/* Form Modals */}
+      <AddInventoryForm
+        isOpen={showAddInventoryForm}
+        onClose={() => setShowAddInventoryForm(false)}
+        onSuccess={handleInventorySuccess}
+      />
+
+      <AddOrderForm
+        isOpen={showAddOrderForm}
+        onClose={() => setShowAddOrderForm(false)}
+        onSuccess={handleOrderSuccess}
+      />
+
+      <AddSupplierForm
+        isOpen={showAddSupplierForm}
+        onClose={() => setShowAddSupplierForm(false)}
+        onSuccess={handleSupplierSuccess}
+      />
     </div>
   );
 }

@@ -15,6 +15,9 @@ import { UserProfile } from './components/auth/UserProfile';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
 import { Outlet } from 'react-router-dom';
 import './App.css';
+import { AddInventoryForm } from './components/addForms/addInventory';
+import { AddSupplierForm } from './components/addForms/addSupplier';
+import { AddOrderForm } from './components/addForms/addOrder';
 
 function App() {
   return (

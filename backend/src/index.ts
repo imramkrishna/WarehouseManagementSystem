@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import authRoutes from "./routes/auth.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import cors from "cors";
-import updateRoutes from "./routes/update.routes"
+import updateRoutes from "./routes/add.routes"
 const app = express();
 
 app.use(express.json());
