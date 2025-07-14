@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Truck, 
+import {
+  Search,
+  Filter,
+  Plus,
+  Eye,
+  Edit,
+  Truck,
   Package,
   Clock,
   CheckCircle,
@@ -16,81 +16,44 @@ import {
   AlertCircle,
   MoreHorizontal
 } from 'lucide-react';
-
+import axios from 'axios';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Order {
-  id: string;
-  orderNumber: string;
-  customer: string;
+  id: number;
+  order_number: string;
+  order_type: 'inbound' | 'outbound';
+  customer_name: string | null;
+  customer_email: string | null;
+  customer_phone: string | null;
+  customer_address: string | null;
+  supplier_id: number | null;
+  warehouse_id: number;
+  order_date: string;
+  expected_delivery_date: string;
+  actual_delivery_date: string | null;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  items: number;
-  total: number;
-  orderDate: string;
-  expectedDelivery: string;
-  priority: 'low' | 'medium' | 'high';
+  total_amount: string;
+  tax_amount: string;
+  shipping_amount: string;
+  discount_amount: string;
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  payment_method: 'cash' | 'card' | 'bank_transfer' | 'online';
+  shipping_method: 'standard' | 'express' | 'overnight';
+  tracking_number: string | null;
+  notes: string | null;
+  created_by: number;
+  assigned_to: number | null;
+  approved_by: number | null;
+  created_at: string;
+  updated_at: string;
 }
-
-const mockOrders: Order[] = [
-  {
-    id: '1',
-    orderNumber: 'ORD-2024-001',
-    customer: 'Acme Corporation',
-    status: 'processing',
-    items: 15,
-    total: 2450.00,
-    orderDate: '2024-01-15',
-    expectedDelivery: '2024-01-20',
-    priority: 'high'
-  },
-  {
-    id: '2',
-    orderNumber: 'ORD-2024-002',
-    customer: 'Tech Solutions Inc',
-    status: 'pending',
-    items: 8,
-    total: 1200.00,
-    orderDate: '2024-01-16',
-    expectedDelivery: '2024-01-22',
-    priority: 'medium'
-  },
-  {
-    id: '3',
-    orderNumber: 'ORD-2024-003',
-    customer: 'Global Enterprises',
-    status: 'shipped',
-    items: 25,
-    total: 3800.00,
-    orderDate: '2024-01-14',
-    expectedDelivery: '2024-01-19',
-    priority: 'high'
-  },
-  {
-    id: '4',
-    orderNumber: 'ORD-2024-004',
-    customer: 'StartUp Co',
-    status: 'delivered',
-    items: 5,
-    total: 750.00,
-    orderDate: '2024-01-12',
-    expectedDelivery: '2024-01-17',
-    priority: 'low'
-  },
-  {
-    id: '5',
-    orderNumber: 'ORD-2024-005',
-    customer: 'Manufacturing Ltd',
-    status: 'cancelled',
-    items: 12,
-    total: 1850.00,
-    orderDate: '2024-01-13',
-    expectedDelivery: '2024-01-18',
-    priority: 'medium'
-  }
-];
-
 export function OrderList() {
-  const [orders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {
@@ -140,8 +103,8 @@ export function OrderList() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -151,10 +114,37 @@ export function OrderList() {
     return acc;
   }, {} as Record<string, number>);
 
+  async function fetchOrders() {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${BACKEND_URI}/profile/orders`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+      setOrders(response.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+    setLoading(false);
+
+  }
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">{<LoadingSpinner />}</div>
+        <div className="ml-4 text-gray-500">Loading orders...</div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
           <p className="text-gray-600">Manage and track all customer orders</p>
@@ -166,7 +156,7 @@ export function OrderList() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -216,10 +206,10 @@ export function OrderList() {
 
       {/* Filters */}
       <Card className="p-6">
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
               <Input
                 placeholder="Search orders..."
                 value={searchTerm}
@@ -233,7 +223,7 @@ export function OrderList() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -250,33 +240,33 @@ export function OrderList() {
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Order
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Customer
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Priority
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Items
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Total
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Order Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Expected Delivery
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                   Actions
                 </th>
               </tr>
@@ -286,11 +276,11 @@ export function OrderList() {
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {order.orderNumber}
+                      {order.order_number}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{order.customer}</div>
+                    <div className="text-sm text-gray-900">{order.customer_name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
@@ -305,19 +295,19 @@ export function OrderList() {
                       {order.priority.charAt(0).toUpperCase() + order.priority.slice(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.items}
+                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                    {order.order_number}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${order.total.toFixed(2)}
+                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                    ${order.total_amount}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(order.orderDate).toLocaleDateString()}
+                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                    {new Date(order.order_date).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(order.expectedDelivery).toLocaleDateString()}
+                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                    {new Date(order.expected_delivery_date).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <Button variant="ghost" size="sm">
                         <Eye className="w-4 h-4" />
