@@ -18,6 +18,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
+  const profile = JSON.parse(localStorage.getItem('profile') || '{}');
 
   return (
     <header className="flex items-center justify-between h-16 px-6 transition-colors bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
@@ -70,7 +71,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               className="object-cover w-8 h-8 rounded-full"
             />
             <span className="hidden text-sm font-medium text-gray-700 md:block dark:text-gray-200">
-              {user?.name}
+              {profile?.name}
             </span>
             <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           </button>

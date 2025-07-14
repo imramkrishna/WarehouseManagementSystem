@@ -38,7 +38,8 @@ export function DashboardOverview() {
           Authorization: `Bearer ${accessToken}`
         }
       })
-
+      localStorage.setItem('profile', JSON.stringify(response.data.profile.userDetails));
+      console.log(response.data.profile.userDetails);
       setProfile(response.data.profile);
       setData(response.data.stats);
       setLoading(false);
