@@ -95,7 +95,7 @@ export function InventoryList() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching inventory:', error);
-      setLoading(false);
+      setLoading(true);
     }
   }
   useEffect(() => {

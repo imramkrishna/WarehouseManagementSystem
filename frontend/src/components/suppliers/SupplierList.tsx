@@ -86,7 +86,7 @@ export function SupplierList() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching warehouses:', error);
-      setLoading(false);
+      setLoading(true);
     }
   }
   useEffect(() => {

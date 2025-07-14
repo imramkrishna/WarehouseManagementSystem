@@ -44,7 +44,7 @@ export function DashboardOverview() {
       setData(response.data.stats);
       setLoading(false);
     } catch (error) {
-      setLoading(false)
+      setLoading(true)
       console.error('Error fetching dashboard data:', error);
     }
   }

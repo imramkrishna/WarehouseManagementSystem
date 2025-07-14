@@ -24,7 +24,7 @@ const navigation = [
   { name: 'Suppliers', href: '/suppliers', icon: Users },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
   { name: 'Analytics', href: '/analytics', icon: TrendingUp },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Settings', href: '/profile', icon: Settings },
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
