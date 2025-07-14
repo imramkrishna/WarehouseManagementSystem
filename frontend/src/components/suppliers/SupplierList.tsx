@@ -20,6 +20,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import axios from 'axios';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Supplier {
   id: number;
@@ -46,6 +47,9 @@ export function SupplierList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+  const [totalRating, setTotalRating] = useState<number>(0);
+  const [averageRating, setAverageRating] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
   const getStatusColor = (status: Supplier['status']) => {
@@ -72,12 +76,12 @@ export function SupplierList() {
   };
   async function fetchSuppliers() {
     try {
+      setLoading(true);
       const response = await axios.get(`${BACKEND_URI}/profile/suppliers`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         }
       });
-      console.log(response.data)
       setSuppliers(response.data.suppliers);
       setLoading(false);
     } catch (error) {
@@ -88,7 +92,23 @@ export function SupplierList() {
   useEffect(() => {
     fetchSuppliers();
   }, [])
+  useEffect(() => {
+    setLoading(true)
+    if (suppliers.length > 0) {
+      const statusCounts = suppliers.reduce((acc, supplier) => {
+        acc[supplier.status] = (acc[supplier.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const totalRating = suppliers.reduce((sum, supplier) => sum + (supplier.rating || 0), 0);
+      const averageRating = suppliers.reduce((sum, supplier) => sum + supplier.rating, 0) / suppliers.length;
+      setStatusCounts(statusCounts);
+      setTotalRating(totalRating);
+      setAverageRating(averageRating);
+      setLoading(false);
+    }
 
+
+  }, [suppliers])
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.contact_person.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,12 +118,14 @@ export function SupplierList() {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const statusCounts = suppliers.reduce((acc, supplier) => {
-    acc[supplier.status] = (acc[supplier.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  const totalRating = suppliers.reduce((sum, supplier) => sum + (supplier.rating || 0), 0);
-  const averageRating = suppliers.reduce((sum, supplier) => sum + supplier.rating, 0) / suppliers.length;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-500">{<LoadingSpinner />}</div>
+        <div className="ml-4 text-gray-500">Loading Suppliers...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
