@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-// Import the form components
 import { AddInventoryForm } from '../addForms/addInventory';
 import { AddOrderForm } from '../addForms/addOrder';
 import { AddSupplierForm } from '../addForms/addSupplier';
