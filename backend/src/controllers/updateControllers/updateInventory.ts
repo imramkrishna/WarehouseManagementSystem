@@ -10,7 +10,11 @@ async function updateInventory(req: Request, res: Response) {
             SET sku = $1, product_name = $2, quantity = $3, supplier_id = $4, status = $5
             WHERE id = $6
         `;
-        const values = [sku, product_name, quantity, supplier_id, status, id];
+        const values = [
+            id, brand, category, cost_price, description, dimensions,
+            expiry_date, maximum_stock_level, minimum_stock_level,
+            quantity_on_hand, quantity_reserved, unit_of_measure, status
+        ];
 
         await pool.query(query, values);
         res.status(200).json({ message: "Inventory updated successfully" });
@@ -19,3 +23,4 @@ async function updateInventory(req: Request, res: Response) {
         res.status(500).json({ error: "Internal server error" });
     }
 }
+export default updateInventory;
