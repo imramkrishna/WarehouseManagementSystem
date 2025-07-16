@@ -48,7 +48,6 @@ export function DashboardOverview() {
         }
       })
       localStorage.setItem('profile', JSON.stringify(response.data.profile.userDetails));
-      console.log(response.data.profile.userDetails);
       setProfile(response.data.profile);
       setData(response.data.stats);
       setLoading(false);
@@ -62,20 +61,16 @@ export function DashboardOverview() {
     getData();
   }, []);
 
-  // Success handlers to refresh dashboard data
   const handleInventorySuccess = () => {
-    getData(); // Refresh dashboard data
-    console.log('Inventory item added successfully!');
+    getData();
   };
 
   const handleOrderSuccess = () => {
-    getData(); // Refresh dashboard data
-    console.log('Order created successfully!');
+    getData();
   };
 
   const handleSupplierSuccess = () => {
-    getData(); // Refresh dashboard data
-    console.log('Supplier added successfully!');
+    getData();
   };
 
   if (loading) {

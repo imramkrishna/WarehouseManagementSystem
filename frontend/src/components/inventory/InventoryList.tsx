@@ -17,8 +17,9 @@ import {
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { AddInventoryForm } from '../addForms/addInventory';
+import { UpdateInventoryForm } from '../addForms/updateInventory';
 
-interface InventoryItem {
+export interface InventoryItem {
   id: number;
   product_name: string;
   sku: string;
@@ -61,7 +62,9 @@ export function InventoryList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [showEditForm, setShowEditForm] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
   const filteredInventory = inventoryItems.filter(item => {
     const matchesSearch = item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -138,7 +141,17 @@ export function InventoryList() {
         return null;
     }
   };
+  async function handleProductEdit(id: number) {
+    const item = inventoryItems.find(item => item.id === id);
+    if (!item) {
+      console.error('Item not found for ID:', id);
+      return;
+    }
+    console.log('handleProductEdit called with ID:', item);
+    setSelectedItem(item);
+    setShowEditForm(true);
 
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -337,14 +350,11 @@ export function InventoryList() {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                     <div className="flex items-center justify-end space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button onClick={() => handleProductEdit(item.id)} variant="ghost" size="sm">
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button variant="ghost" size="sm">
                         <Trash2 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
                   </td>
@@ -367,10 +377,25 @@ export function InventoryList() {
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
         onSuccess={() => {
-          fetchInventory(); // Refresh the list
-          console.log('Inventory item added successfully!');
+          fetchInventory();
+
         }}
       />
+      <UpdateInventoryForm
+        isOpen={showEditForm}
+        onClose={() => {
+          setShowEditForm(false);
+          setSelectedItem(null);
+        }}
+        onSuccess={() => {
+          fetchInventory();
+          console.log('Inventory updated successfully!');
+        }}
+        inventory={selectedItem}
+      />
+
     </div>
+
   );
+
 }
