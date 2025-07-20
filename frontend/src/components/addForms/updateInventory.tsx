@@ -27,13 +27,12 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
         return null; // Handle case where inventory is null
     }
     const [formData, setFormData] = useState({
+        id: inventory.id,
         sku: inventory.sku,
         product_name: inventory.product_name,
         description: inventory.description,
         category: inventory.category,
         brand: inventory.brand,
-        supplier_id: inventory.supplier_id.toString(),
-        warehouse_id: inventory.warehouse_id.toString(),
         location: inventory.location,
         quantity_on_hand: inventory.quantity_on_hand.toString(),
         quantity_reserved: inventory.quantity_reserved.toString(),
@@ -70,8 +69,6 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
         if (!formData.sku) newErrors.sku = 'SKU is required';
         if (!formData.product_name) newErrors.product_name = 'Product name is required';
         if (!formData.category) newErrors.category = 'Category is required';
-        if (!formData.supplier_id) newErrors.supplier_id = 'Supplier is required';
-        if (!formData.warehouse_id) newErrors.warehouse_id = 'Warehouse is required';
         if (!formData.quantity_on_hand) newErrors.quantity_on_hand = 'Quantity on hand is required';
         if (!formData.unit_price) newErrors.unit_price = 'Unit price is required';
         if (!formData.cost_price) newErrors.cost_price = 'Cost price is required';
@@ -81,13 +78,14 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
 
+        e.preventDefault();
+        console.log("Submitting form data:")
         if (!validateForm()) return;
 
         setLoading(true);
         try {
-            await axios.put(`${BACKEND_URI}/profile/inventory/${inventory}`, formData, {
+            await axios.put(`${BACKEND_URI}/update/inventory`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -103,6 +101,7 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
             }
         } finally {
             setLoading(false);
+            console.log("Form submission completed");
         }
     };
 
@@ -155,7 +154,6 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
                                 label="SKU *"
                                 name="sku"
                                 value={formData.sku}
-                                onChange={handleInputChange}
                                 placeholder="Enter SKU"
                                 error={errors.sku}
                             />
@@ -186,14 +184,12 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
                                 label="Barcode"
                                 name="barcode"
                                 value={formData.barcode}
-                                onChange={handleInputChange}
                                 placeholder="Enter barcode"
                             />
                             <Input
                                 label="Batch Number"
                                 name="batch_number"
                                 value={formData.batch_number}
-                                onChange={handleInputChange}
                                 placeholder="Enter batch number"
                             />
                         </div>
@@ -218,33 +214,6 @@ export function UpdateInventoryForm({ isOpen, onClose, onSuccess, inventory }: U
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">Supplier & Location</h3>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Supplier *
-                                </label>
-                                <select
-                                    name="supplier_id"
-                                    value={formData.supplier_id}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                                >
-
-                                </select>
-                                {errors.supplier_id && <p className="mt-1 text-sm text-red-600">{errors.supplier_id}</p>}
-                            </div>
-                            <div>
-                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Warehouse *
-                                </label>
-                                <select
-                                    name="warehouse_id"
-                                    value={formData.warehouse_id}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                                >
-                                </select>
-                                {errors.warehouse_id && <p className="mt-1 text-sm text-red-600">{errors.warehouse_id}</p>}
-                            </div>
                             <Input
                                 label="Location"
                                 name="location"
