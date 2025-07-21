@@ -23,6 +23,7 @@ import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { AddSupplierForm } from '../addForms/addSupplier';
 import { UpdateSupplierForm } from '../addForms/updateSupplier';
+import { ViewSupplier } from '../view/viewSupplier';
 
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Supplier {
@@ -57,6 +58,8 @@ export function SupplierList() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Supplier | null>(null)
+  const [showView, setShowView] = useState<boolean>(false);
+  const [viewSelected, setViewSelected] = useState<Supplier | null>(null);
 
   const getStatusColor = (status: Supplier['status']) => {
     switch (status) {
@@ -315,9 +318,12 @@ export function SupplierList() {
                 <Edit className="w-4 h-4 mr-1" />
                 Edit
               </Button>
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button onClick={() => {
+                setViewSelected(supplier)
+                setShowView(true)
+              }} variant="outline" size="sm" className="flex-1">
                 <Package className="w-4 h-4 mr-1" />
-                Orders
+                View
               </Button>
             </div>
           </Card>
@@ -354,6 +360,14 @@ export function SupplierList() {
         }}
         supplier={selectedItem}
         onSuccess={() => fetchSuppliers}
+      />
+      <ViewSupplier
+        isOpen={showView}
+        onClose={() => {
+          setShowView(false);
+          setViewSelected(null)
+        }}
+        supplier={viewSelected}
       />
 
     </div>

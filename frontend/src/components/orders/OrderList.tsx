@@ -20,6 +20,7 @@ import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { AddOrderForm } from '../addForms/addOrder';
 import { UpdateOrderForm } from '../addForms/updateOrder';
+import { ViewOrder } from '../view/viewOrders';
 
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Order {
@@ -60,6 +61,8 @@ export function OrderList() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false)
   const [selectedItem, setSelectedItem] = useState<Order | null>(null)
+  const [showView, setShowView] = useState<boolean>(false);
+  const [viewSelected, setViewSelected] = useState<Order | null>(null);
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {
@@ -318,7 +321,10 @@ export function OrderList() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button onClick={() => {
+                        setViewSelected(order)
+                        setShowView(true)
+                      }} variant="ghost" size="sm">
                         <Eye className="w-4 h-4" />
                       </Button>
                       <Button onClick={() => {
@@ -357,6 +363,15 @@ export function OrderList() {
           fetchOrders();
         }}
       />
+      <ViewOrder
+        isOpen={showView}
+        onClose={() => {
+          setShowView(false)
+          setViewSelected(null)
+        }}
+        order={viewSelected}
+      />
+
     </div>
   );
 }

@@ -20,6 +20,7 @@ import {
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { UpdateWarehouseForm } from '../addForms/updateWarehouse';
+import { ViewWarehouse } from '../view/viewWarehouse';
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 interface WarehouseData {
@@ -54,6 +55,8 @@ export function WarehouseList() {
   const [totalUsed, setTotalUsed] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<WarehouseData | null>(null);
   const [showEditForm, setShowEditForm] = useState<boolean>(false)
+  const [showViewForm, setShowViewForm] = useState<boolean>(false);
+  const [viewSelected, setViewSelected] = useState<WarehouseData | null>(null)
   const getStatusColor = (status: WarehouseData['status']) => {
     switch (status) {
       case 'active':
@@ -325,7 +328,10 @@ export function WarehouseList() {
                 </div>
 
                 <div className="flex pt-3 space-x-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button onClick={() => {
+                    setShowViewForm(true)
+                    setViewSelected(warehouse)
+                  }} variant="outline" size="sm" className="flex-1">
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
@@ -364,6 +370,13 @@ export function WarehouseList() {
         warehouse={selectedItem}
 
       />
+      <ViewWarehouse
+        isOpen={showViewForm}
+        onClose={() => {
+          setShowViewForm(false)
+          setViewSelected(null)
+        }}
+        warehouse={viewSelected} />
     </div>
 
   );
