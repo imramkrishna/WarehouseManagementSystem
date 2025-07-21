@@ -62,7 +62,7 @@ export function AddOrderForm({ isOpen, onClose, onSuccess }: AddOrderFormProps) 
 
     const fetchSuppliers = async () => {
         try {
-            const response = await axios.get(`${BACKEND_URI}/add/addOrder`, {
+            const response = await axios.get(`${BACKEND_URI}/profile/suppliers`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             });
             setSuppliers(response.data.suppliers || []);
@@ -118,7 +118,7 @@ export function AddOrderForm({ isOpen, onClose, onSuccess }: AddOrderFormProps) 
 
         setLoading(true);
         try {
-            await axios.post(`${BACKEND_URI}/profile/orders/add`, formData, {
+            await axios.post(`${BACKEND_URI}/add/addOrders`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`

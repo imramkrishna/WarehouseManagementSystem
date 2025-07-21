@@ -19,6 +19,7 @@ import {
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { AddOrderForm } from '../addForms/addOrder';
+import { UpdateOrderForm } from '../addForms/updateOrder';
 
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Order {
@@ -57,6 +58,8 @@ export function OrderList() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState<boolean>(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<Order | null>(null)
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {
@@ -318,7 +321,10 @@ export function OrderList() {
                       <Button variant="ghost" size="sm">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button onClick={() => {
+                        setShowUpdateForm(true)
+                        setSelectedItem(order)
+                      }} variant="ghost" size="sm">
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button variant="ghost" size="sm">
@@ -337,8 +343,18 @@ export function OrderList() {
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
         onSuccess={() => {
-          fetchOrders(); // Refresh the list
-          console.log('Order created successfully!');
+          fetchOrders();
+        }}
+      />
+      <UpdateOrderForm
+        order={selectedItem}
+        isOpen={showUpdateForm}
+        onClose={() => {
+          setShowUpdateForm(false);
+          setSelectedItem(null);
+        }}
+        onSuccess={() => {
+          fetchOrders();
         }}
       />
     </div>

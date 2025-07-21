@@ -90,12 +90,10 @@ async function updateInventory(req: Request, res: Response) {
 
         const result = await pool.query(updateQuery, values);
         const updatedItem = result.rows[0];
-
-        // Log the activity
-        // await pool.query(
-        //     'INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description) VALUES ($1, $2, $3, $4, $5)',
-        //     [updated_by, 'UPDATE', 'inventory', id, `Updated inventory item: ${product_name} (SKU: ${sku})`]
-        // );
+        await pool.query(
+            'INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description) VALUES ($1, $2, $3, $4, $5)',
+            [updated_by, 'UPDATE', 'inventory', id, `Updated inventory item: ${product_name} (SKU: ${sku})`]
+        );
 
         res.status(StatusCodes.OK).json({
             message: "Inventory item updated successfully",

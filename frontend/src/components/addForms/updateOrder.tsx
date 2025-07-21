@@ -4,12 +4,41 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { X, ShoppingCart, Save, AlertCircle } from 'lucide-react';
 import axios from 'axios';
-
+interface Order {
+    id: number;
+    order_number: string;
+    order_type: 'inbound' | 'outbound';
+    customer_name: string | null;
+    customer_email: string | null;
+    customer_phone: string | null;
+    customer_address: string | null;
+    supplier_id: number | null;
+    warehouse_id: number;
+    order_date: string;
+    expected_delivery_date: string;
+    actual_delivery_date: string | null;
+    priority: 'low' | 'medium' | 'high' | 'urgent';
+    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    total_amount: string;
+    tax_amount: string;
+    shipping_amount: string;
+    discount_amount: string;
+    payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+    payment_method: 'cash' | 'card' | 'bank_transfer' | 'online';
+    shipping_method: 'standard' | 'express' | 'overnight';
+    tracking_number: string | null;
+    notes: string | null;
+    created_by: number;
+    assigned_to: number | null;
+    approved_by: number | null;
+    created_at: string;
+    updated_at: string;
+}
 interface UpdateOrderFormProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    orderId: number | null;
+    order: Order | null;
 }
 
 interface Supplier {
@@ -22,7 +51,7 @@ interface Warehouse {
     name: string;
 }
 
-export function UpdateOrderForm({ isOpen, onClose, onSuccess, orderId }: UpdateOrderFormProps) {
+export function UpdateOrderForm({ isOpen, onClose, onSuccess, order }: UpdateOrderFormProps) {
     const [formData, setFormData] = useState({
         order_type: 'outbound',
         customer_name: '',
@@ -56,21 +85,7 @@ export function UpdateOrderForm({ isOpen, onClose, onSuccess, orderId }: UpdateO
     const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
     useEffect(() => {
-        if (isOpen && orderId) {
-            fetchOrder();
-            fetchSuppliers();
-            fetchWarehouses();
-        }
-    }, [isOpen, orderId]);
-
-    const fetchOrder = async () => {
-        try {
-            setInitialLoading(true);
-            const response = await axios.get(`${BACKEND_URI}/profile/orders/${orderId}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-            });
-
-            const order = response.data.order;
+        if (isOpen && order) {
             setFormData({
                 order_type: order.order_type || 'outbound',
                 customer_name: order.customer_name || '',
@@ -94,13 +109,11 @@ export function UpdateOrderForm({ isOpen, onClose, onSuccess, orderId }: UpdateO
                 assigned_to: order.assigned_to?.toString() || '',
                 approved_by: order.approved_by?.toString() || ''
             });
-        } catch (error) {
-            console.error('Error fetching order:', error);
-            setErrors({ general: 'Error loading order details' });
-        } finally {
+            fetchSuppliers();
+            fetchWarehouses();
             setInitialLoading(false);
         }
-    };
+    }, [isOpen, order]);
 
     const fetchSuppliers = async () => {
         try {
@@ -156,11 +169,11 @@ export function UpdateOrderForm({ isOpen, onClose, onSuccess, orderId }: UpdateO
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!validateForm()) return;
+        if (!validateForm() || !order) return;
 
         setLoading(true);
         try {
-            await axios.put(`${BACKEND_URI}/profile/orders/${orderId}`, formData, {
+            await axios.put(`${BACKEND_URI}/profile/orders/${order.id}`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -181,7 +194,7 @@ export function UpdateOrderForm({ isOpen, onClose, onSuccess, orderId }: UpdateO
 
     if (!isOpen) return null;
 
-    if (initialLoading) {
+    if (initialLoading || !order) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
                 <Card className="w-full max-w-md p-6">
