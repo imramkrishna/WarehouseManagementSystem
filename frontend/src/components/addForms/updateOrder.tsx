@@ -173,7 +173,7 @@ export function UpdateOrderForm({ isOpen, onClose, onSuccess, order }: UpdateOrd
 
         setLoading(true);
         try {
-            await axios.put(`${BACKEND_URI}/profile/orders/${order.id}`, formData, {
+            await axios.put(`${BACKEND_URI}/update/orders/${order.id}`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`

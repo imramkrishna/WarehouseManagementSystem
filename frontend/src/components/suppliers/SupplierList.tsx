@@ -22,6 +22,7 @@ import {
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { AddSupplierForm } from '../addForms/addSupplier';
+import { UpdateSupplierForm } from '../addForms/updateSupplier';
 
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 interface Supplier {
@@ -54,6 +55,8 @@ export function SupplierList() {
   const [averageRating, setAverageRating] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Supplier | null>(null)
 
   const getStatusColor = (status: Supplier['status']) => {
     switch (status) {
@@ -305,7 +308,10 @@ export function SupplierList() {
             </div>
 
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button onClick={() => {
+                setSelectedItem(supplier)
+                setShowEditForm(true);
+              }} variant="outline" size="sm" className="flex-1">
                 <Edit className="w-4 h-4 mr-1" />
                 Edit
               </Button>
@@ -340,6 +346,16 @@ export function SupplierList() {
           console.log('Supplier added successfully!');
         }}
       />
+      <UpdateSupplierForm
+        isOpen={showEditForm}
+        onClose={() => {
+          setSelectedItem(null);
+          setShowEditForm(false);
+        }}
+        supplier={selectedItem}
+        onSuccess={() => fetchSuppliers}
+      />
+
     </div>
   );
 }

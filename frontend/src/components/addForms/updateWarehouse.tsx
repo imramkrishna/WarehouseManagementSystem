@@ -2,79 +2,78 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { X, Users, Save, AlertCircle } from 'lucide-react';
+import { X, Warehouse, Save, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 
-interface Supplier {
+interface WarehouseData {
     id: number;
-    company_name: string;
-    contact_person: string;
-    email: string;
-    phone: string;
+    name: string;
     address: string;
     city: string;
     state: string;
     country: string;
     zip_code: string;
-    status: 'active' | 'inactive' | 'pending';
-    rating: number;
-    payment_terms: string;
-    tax_id: string;
+    phone: string;
+    email: string;
+    warehouse_type: 'distribution' | 'storage' | 'fulfillment';
+    status: 'active' | 'inactive' | 'maintenance';
+    total_capacity: number;
+    available_capacity: number;
+    manager_id: number;
     created_at: string;
     updated_at: string;
     created_by: number;
-    updated_by: number;
 }
-interface UpdateSupplierFormProps {
+
+interface UpdateWarehouseFormProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    supplier: Supplier | null;
+    warehouse: WarehouseData | null;
 }
 
-export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: UpdateSupplierFormProps) {
+export function UpdateWarehouseForm({ isOpen, onClose, onSuccess, warehouse }: UpdateWarehouseFormProps) {
     const [formData, setFormData] = useState({
-        company_name: '',
-        contact_person: '',
-        email: '',
-        phone: '',
+        name: '',
         address: '',
         city: '',
         state: '',
-        zip_code: '',
         country: '',
-        tax_id: '',
-        payment_terms: '',
-        rating: '0',
-        status: 'active'
+        zip_code: '',
+        phone: '',
+        email: '',
+        warehouse_type: 'storage',
+        status: 'active',
+        total_capacity: '',
+        available_capacity: '',
+        manager_id: ''
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
-    const [initialLoading, setInitialLoading] = useState(false); // Changed to false since we don't need to fetch
 
     const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
-    // Updated useEffect to directly set form data from supplier prop
+    // Set form data from warehouse prop
     useEffect(() => {
-        if (isOpen && supplier) {
+        if (isOpen && warehouse) {
             setFormData({
-                company_name: supplier.company_name || '',
-                contact_person: supplier.contact_person || '',
-                email: supplier.email || '',
-                phone: supplier.phone || '',
-                address: supplier.address || '',
-                city: supplier.city || '',
-                state: supplier.state || '',
-                zip_code: supplier.zip_code || '',
-                country: supplier.country || '',
-                tax_id: supplier.tax_id || '',
-                payment_terms: supplier.payment_terms || '',
-                rating: supplier.rating?.toString() || '0',
-                status: supplier.status || 'active'
+                name: warehouse.name || '',
+                address: warehouse.address || '',
+                city: warehouse.city || '',
+                state: warehouse.state || '',
+                country: warehouse.country || '',
+                zip_code: warehouse.zip_code || '',
+                phone: warehouse.phone || '',
+                email: warehouse.email || '',
+                warehouse_type: warehouse.warehouse_type || 'storage',
+                status: warehouse.status || 'active',
+                total_capacity: warehouse.total_capacity?.toString() || '',
+                available_capacity: warehouse.available_capacity?.toString() || '',
+                manager_id: warehouse.manager_id?.toString() || ''
             });
         }
-    }, [isOpen, supplier]);
+    }, [isOpen, warehouse]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -87,13 +86,15 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.company_name) newErrors.company_name = 'Company name is required';
-        if (!formData.contact_person) newErrors.contact_person = 'Contact person is required';
-        if (!formData.email) newErrors.email = 'Email is required';
-        if (!formData.phone) newErrors.phone = 'Phone is required';
+        if (!formData.name) newErrors.name = 'Warehouse name is required';
         if (!formData.address) newErrors.address = 'Address is required';
         if (!formData.city) newErrors.city = 'City is required';
         if (!formData.country) newErrors.country = 'Country is required';
+        if (!formData.zip_code) newErrors.zip_code = 'ZIP code is required';
+        if (!formData.phone) newErrors.phone = 'Phone is required';
+        if (!formData.email) newErrors.email = 'Email is required';
+        if (!formData.total_capacity) newErrors.total_capacity = 'Total capacity is required';
+        if (!formData.available_capacity) newErrors.available_capacity = 'Available capacity is required';
 
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -101,10 +102,20 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
             newErrors.email = 'Please enter a valid email address';
         }
 
-        // Rating validation
-        const rating = parseInt(formData.rating);
-        if (rating < 0 || rating > 5) {
-            newErrors.rating = 'Rating must be between 0 and 5';
+        // Capacity validation
+        const totalCapacity = parseInt(formData.total_capacity) || 0;
+        const availableCapacity = parseInt(formData.available_capacity) || 0;
+
+        if (totalCapacity <= 0) {
+            newErrors.total_capacity = 'Total capacity must be greater than 0';
+        }
+
+        if (availableCapacity < 0) {
+            newErrors.available_capacity = 'Available capacity cannot be negative';
+        }
+
+        if (availableCapacity > totalCapacity) {
+            newErrors.available_capacity = 'Available capacity cannot exceed total capacity';
         }
 
         setErrors(newErrors);
@@ -114,12 +125,11 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!validateForm() || !supplier) return;
+        if (!validateForm() || !warehouse) return;
 
         setLoading(true);
         try {
-            // Fixed: Use supplier.id instead of supplier
-            await axios.put(`${BACKEND_URI}/update/suppliers/${supplier.id}`, formData, {
+            await axios.put(`${BACKEND_URI}/update/warehouse/${warehouse.id}`, formData, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -129,9 +139,11 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
             onSuccess();
             onClose();
         } catch (error: any) {
-            console.error('Error updating supplier:', error);
+            console.error('Error updating warehouse:', error);
             if (error.response?.data?.message) {
                 setErrors({ general: error.response.data.message });
+            } else {
+                setErrors({ general: 'Error updating warehouse. Please try again.' });
             }
         } finally {
             setLoading(false);
@@ -140,14 +152,14 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
 
     if (!isOpen) return null;
 
-    // Updated loading condition - only show loading if no supplier data
-    if (!supplier) {
+    // Show loading if no warehouse data
+    if (!warehouse) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
                 <Card className="w-full max-w-md p-6">
                     <div className="flex items-center justify-center space-x-2">
-                        <div className="w-6 h-6 border-2 border-purple-600 rounded-full border-t-transparent animate-spin" />
-                        <span className="text-gray-600 dark:text-gray-400">Loading supplier details...</span>
+                        <div className="w-6 h-6 border-2 border-blue-600 rounded-full border-t-transparent animate-spin" />
+                        <span className="text-gray-600 dark:text-gray-400">Loading warehouse details...</span>
                     </div>
                 </Card>
             </div>
@@ -156,15 +168,15 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-            <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-purple-100 rounded-lg dark:bg-purple-900">
-                            <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                        <div className="p-2 bg-blue-100 rounded-lg dark:bg-blue-900">
+                            <Warehouse className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Update Supplier</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Modify the supplier information</p>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Update Warehouse</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Modify the warehouse information</p>
                         </div>
                     </div>
                     <Button variant="ghost" size="sm" onClick={onClose}>
@@ -180,34 +192,25 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
                         </div>
                     )}
 
-                    {/* Company Information */}
+                    {/* Basic Information */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Company Information</h3>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Basic Information</h3>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <Input
-                                label="Company Name *"
-                                name="company_name"
-                                value={formData.company_name}
+                                label="Warehouse Name *"
+                                name="name"
+                                value={formData.name}
                                 onChange={handleInputChange}
-                                placeholder="Enter company name"
-                                error={errors.company_name}
+                                placeholder="Enter warehouse name"
+                                error={errors.name}
                             />
                             <Input
-                                label="Contact Person *"
-                                name="contact_person"
-                                value={formData.contact_person}
+                                label="Manager ID"
+                                name="manager_id"
+                                type="number"
+                                value={formData.manager_id}
                                 onChange={handleInputChange}
-                                placeholder="Enter contact person name"
-                                error={errors.contact_person}
-                            />
-                            <Input
-                                label="Email *"
-                                name="email"
-                                type="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                placeholder="Enter email address"
-                                error={errors.email}
+                                placeholder="Enter manager ID"
                             />
                             <Input
                                 label="Phone *"
@@ -218,15 +221,32 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
                                 error={errors.phone}
                             />
                             <Input
-                                label="Tax ID"
-                                name="tax_id"
-                                value={formData.tax_id}
+                                label="Email *"
+                                name="email"
+                                type="email"
+                                value={formData.email}
                                 onChange={handleInputChange}
-                                placeholder="Enter tax ID"
+                                placeholder="Enter email address"
+                                error={errors.email}
                             />
                             <div>
                                 <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Status
+                                    Warehouse Type *
+                                </label>
+                                <select
+                                    name="warehouse_type"
+                                    value={formData.warehouse_type}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                                >
+                                    <option value="distribution">Distribution</option>
+                                    <option value="storage">Storage</option>
+                                    <option value="fulfillment">Fulfillment</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Status *
                                 </label>
                                 <select
                                     name="status"
@@ -236,7 +256,7 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
                                 >
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
-                                    <option value="pending">Pending</option>
+                                    <option value="maintenance">Maintenance</option>
                                 </select>
                             </div>
                         </div>
@@ -271,11 +291,12 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
                                     placeholder="Enter state"
                                 />
                                 <Input
-                                    label="ZIP Code"
+                                    label="ZIP Code *"
                                     name="zip_code"
                                     value={formData.zip_code}
                                     onChange={handleInputChange}
                                     placeholder="Enter ZIP code"
+                                    error={errors.zip_code}
                                 />
                             </div>
                             <Input
@@ -288,37 +309,57 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
                             />
                         </div>
                     </div>
+
+                    {/* Capacity Information */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Business Details</h3>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Capacity Information</h3>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <Input
-                                label="Payment Terms"
-                                name="payment_terms"
-                                value={formData.payment_terms}
+                                label="Total Capacity (sq ft) *"
+                                name="total_capacity"
+                                type="number"
+                                value={formData.total_capacity}
                                 onChange={handleInputChange}
-                                placeholder="e.g., Net 30, Net 60"
+                                placeholder="Enter total capacity"
+                                error={errors.total_capacity}
                             />
-                            <div>
-                                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Rating (0-5)
-                                </label>
-                                <select
-                                    name="rating"
-                                    value={formData.rating}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                                >
-                                    <option value="0">0 - Not rated</option>
-                                    <option value="1">1 - Poor</option>
-                                    <option value="2">2 - Fair</option>
-                                    <option value="3">3 - Good</option>
-                                    <option value="4">4 - Very Good</option>
-                                    <option value="5">5 - Excellent</option>
-                                </select>
-                                {errors.rating && <p className="mt-1 text-sm text-red-600">{errors.rating}</p>}
-                            </div>
+                            <Input
+                                label="Available Capacity (sq ft) *"
+                                name="available_capacity"
+                                type="number"
+                                value={formData.available_capacity}
+                                onChange={handleInputChange}
+                                placeholder="Enter available capacity"
+                                error={errors.available_capacity}
+                            />
                         </div>
+
+                        {/* Capacity Utilization Display */}
+                        {formData.total_capacity && formData.available_capacity && (
+                            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">Capacity Utilization</span>
+                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {Math.round(((parseInt(formData.total_capacity) - parseInt(formData.available_capacity)) / parseInt(formData.total_capacity)) * 100)}%
+                                    </span>
+                                </div>
+                                <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                                    <div
+                                        className="h-2 bg-blue-500 rounded-full"
+                                        style={{
+                                            width: `${Math.round(((parseInt(formData.total_capacity) - parseInt(formData.available_capacity)) / parseInt(formData.total_capacity)) * 100)}%`
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <span>{(parseInt(formData.total_capacity) - parseInt(formData.available_capacity)).toLocaleString()} used</span>
+                                    <span>{parseInt(formData.total_capacity).toLocaleString()} total</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
+
+                    {/* Form Actions */}
                     <div className="flex justify-end pt-6 space-x-3 border-t dark:border-gray-700">
                         <Button
                             type="button"
@@ -341,7 +382,7 @@ export function UpdateSupplierForm({ isOpen, onClose, onSuccess, supplier }: Upd
                             ) : (
                                 <>
                                     <Save className="w-4 h-4" />
-                                    <span>Update Supplier</span>
+                                    <span>Update Warehouse</span>
                                 </>
                             )}
                         </Button>

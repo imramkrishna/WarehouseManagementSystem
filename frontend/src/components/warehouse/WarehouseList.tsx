@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { UpdateWarehouseForm } from '../addForms/updateWarehouse';
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 interface WarehouseData {
@@ -51,7 +52,8 @@ export function WarehouseList() {
   const [totalStock, setTotalStock] = useState<number>(0);
   const [totalAvailable, setTotalAvailable] = useState<number>(0);
   const [totalUsed, setTotalUsed] = useState<number>(0);
-
+  const [selectedItem, setSelectedItem] = useState<WarehouseData | null>(null);
+  const [showEditForm, setShowEditForm] = useState<boolean>(false)
   const getStatusColor = (status: WarehouseData['status']) => {
     switch (status) {
       case 'active':
@@ -327,7 +329,10 @@ export function WarehouseList() {
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button onClick={() => {
+                    setShowEditForm(true);
+                    setSelectedItem(warehouse)
+                  }} variant="outline" size="sm" className="flex-1">
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
@@ -347,6 +352,19 @@ export function WarehouseList() {
           </div>
         </Card>
       )}
+      <UpdateWarehouseForm
+        isOpen={showEditForm}
+        onClose={() => {
+          setSelectedItem(null);
+          setShowEditForm(false)
+        }}
+        onSuccess={() => {
+          fetchWarehouses
+        }}
+        warehouse={selectedItem}
+
+      />
     </div>
+
   );
 }

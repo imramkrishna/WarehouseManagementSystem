@@ -11,7 +11,6 @@ async function orders(req: Request, res: Response) {
             return;
         }
         res.status(StatusCodes.OK).json(result.rows);
-        console.log("Orders fetched successfully : ", result.rows);
     } catch (error) {
         console.error("Error fetching orders:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });

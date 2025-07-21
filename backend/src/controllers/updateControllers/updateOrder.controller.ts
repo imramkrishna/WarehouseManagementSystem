@@ -31,8 +31,6 @@ async function updateOrder(req: Request, res: Response) {
         // Get order ID from URL params
         const orderId = req.params.id;
 
-        // Get user ID from the authenticated request
-        const updated_by = req.profile.id;
 
         // Validate required fields
         if (!orderId) {
@@ -93,18 +91,16 @@ async function updateOrder(req: Request, res: Response) {
         // Calculate net amount (total - discount)
         const totalAmt = parseFloat(total_amount) || 0;
         const discountAmt = parseFloat(discount_amount) || 0;
-        const net_amount = totalAmt - discountAmt;
-
         // Update order
         const updateQuery = `
             UPDATE orders
             SET order_type = $1, customer_name = $2, customer_email = $3, customer_phone = $4,
                 customer_address = $5, supplier_id = $6, warehouse_id = $7, expected_delivery_date = $8,
                 priority = $9, status = $10, total_amount = $11, tax_amount = $12,
-                shipping_amount = $13, discount_amount = $14, net_amount = $15, payment_status = $16,
-                payment_method = $17, shipping_method = $18, tracking_number = $19, notes = $20,
-                assigned_to = $21, approved_by = $22, updated_by = $23, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $24
+                shipping_amount = $13, discount_amount = $14, payment_status = $15,
+                payment_method = $16, shipping_method = $17, tracking_number = $18, notes = $19,
+                assigned_to = $20, approved_by = $21, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $22
             RETURNING *
         `;
 
@@ -123,7 +119,6 @@ async function updateOrder(req: Request, res: Response) {
             parseFloat(tax_amount) || 0,
             parseFloat(shipping_amount) || 0,
             discountAmt,
-            net_amount,
             payment_status || 'pending',
             payment_method,
             shipping_method,
@@ -131,7 +126,6 @@ async function updateOrder(req: Request, res: Response) {
             notes,
             assigned_to ? parseInt(assigned_to) : null,
             approved_by ? parseInt(approved_by) : null,
-            updated_by,
             orderId
         ];
 
@@ -141,16 +135,8 @@ async function updateOrder(req: Request, res: Response) {
         // Log the activity
         await pool.query(
             'INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description) VALUES ($1, $2, $3, $4, $5)',
-            [updated_by, 'UPDATE', 'order', orderId, `Updated ${order_type} order ${updatedOrder.order_number}`]
+            [1, 'UPDATE', 'order', orderId, `Updated ${order_type} order ${updatedOrder.order_number}`]
         );
-
-        // Update order status history if status changed
-        if (status) {
-            await pool.query(
-                'INSERT INTO order_status_history (order_id, status, changed_by, changed_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)',
-                [orderId, status, updated_by]
-            );
-        }
 
         res.status(StatusCodes.OK).json({
             message: "Order updated successfully",
