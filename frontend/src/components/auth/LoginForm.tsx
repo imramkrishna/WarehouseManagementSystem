@@ -4,7 +4,7 @@ import { useNotifications } from '../../contexts/NotificationContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { Package, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Package, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
@@ -20,7 +20,7 @@ export function LoginForm() {
  
   useEffect(() => {
     if (!isLoading && user) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [user, isLoading, navigate]);
 
@@ -47,29 +47,38 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 transition-colors bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="flex items-center justify-center min-h-screen p-4 transition-colors bg-gradient-to-br from-slate-50 via-emerald-50 to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="w-full max-w-md">
-        <div className="overflow-hidden bg-white shadow-xl dark:bg-gray-800 rounded-2xl">
+        {/* Back to Home Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center mb-4 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back to Home
+        </button>
+
+        <div className="overflow-hidden bg-white shadow-2xl dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
           {/* Header */}
-          <div className="p-8 text-center bg-gradient-to-r from-blue-600 to-indigo-600">
+          <div className="p-8 text-center bg-gradient-to-r from-emerald-500 to-teal-600">
             <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-full bg-white/20">
+              <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm">
                 <Package className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-white">Warehouse Management</h1>
-            <p className="text-blue-100">Sign in to your account</p>
+            <h1 className="mb-2 text-2xl font-bold text-white">WareFlow</h1>
+            <p className="text-emerald-50">Sign in to your account</p>
           </div>
 
           {/* Form */}
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500" />
+                  <Mail className="absolute w-5 h-5 text-slate-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-slate-500" />
                   <Input
                     type="email"
                     value={email}
@@ -82,11 +91,11 @@ export function LoginForm() {
               </div>
 
               <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500" />
+                  <Lock className="absolute w-5 h-5 text-slate-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-slate-500" />
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -98,7 +107,7 @@ export function LoginForm() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                    className="absolute text-slate-400 transform -translate-y-1/2 right-3 top-1/2 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -109,18 +118,18 @@ export function LoginForm() {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    className="text-blue-600 border-gray-300 rounded dark:border-gray-600 focus:ring-blue-500 dark:bg-gray-700"
+                    className="text-emerald-600 border-slate-300 rounded dark:border-slate-600 focus:ring-emerald-500 dark:bg-slate-700"
                   />
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                  <span className="ml-2 text-sm text-slate-600 dark:text-slate-400">Remember me</span>
                 </label>
-                <a href="#" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
+                <a href="#" className="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300">
                   Forgot password?
                 </a>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-emerald-500/50 transition-all duration-200"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -135,7 +144,7 @@ export function LoginForm() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Demo credentials: admin@warehouse.com / password
               </p>
             </div>

@@ -13,11 +13,9 @@ import { SupplierList } from './components/suppliers/SupplierList';
 import { ReportDashboard } from './components/reports/ReportDashboard';
 import { UserProfile } from './components/auth/UserProfile';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
+import { LandingPage } from './components/landing/LandingPage';
 import { Outlet } from 'react-router-dom';
 import './App.css';
-import { AddInventoryForm } from './components/addForms/addInventory';
-import { AddSupplierForm } from './components/addForms/addSupplier';
-import { AddOrderForm } from './components/addForms/addOrder';
 
 function App() {
   return (
@@ -27,9 +25,10 @@ function App() {
           <NotificationProvider>
             <Router>
               <Routes>
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginForm />} />
                 <Route
-                  path="/"
+                  path="/dashboard"
                   element={
                     <AuthGuard>
                       <AppLayout>
