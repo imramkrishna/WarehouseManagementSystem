@@ -11,8 +11,7 @@ import {
   Trash2,
   AlertTriangle,
   TrendingUp,
-  TrendingDown,
-  MoreVertical
+  TrendingDown
 } from 'lucide-react';
 import axios from 'axios';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -78,13 +77,17 @@ export function InventoryList() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in-stock':
-        return 'bg-green-100 text-green-800';
+      case 'active':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400';
       case 'low-stock':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
       case 'out-of-stock':
-        return 'bg-red-100 text-red-800';
+      case 'inactive':
+        return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400';
+      case 'discontinued':
+        return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
     }
   };
   async function fetchInventory() {
@@ -97,11 +100,12 @@ export function InventoryList() {
         }
       });
 
-      setInventoryItems(response.data.items);
+      setInventoryItems(response.data.items || []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching inventory:', error);
-      setLoading(true);
+      setInventoryItems([]);
+      setLoading(false); // Fix: Set to false instead of true
     }
   }
   useEffect(() => {
@@ -122,9 +126,9 @@ export function InventoryList() {
   }, [inventoryItems]);
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-500">{<LoadingSpinner />}</div>
-        <div className="ml-4 text-gray-500">Loading inventory...</div>
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-amber-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <LoadingSpinner />
+        <div className="mt-4 text-slate-600 dark:text-slate-300">Loading inventory...</div>
       </div>
     );
   }
@@ -157,11 +161,11 @@ export function InventoryList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-          <p className="mt-2 text-gray-600">Manage your warehouse inventory and stock levels</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Inventory Management</h1>
+          <p className="mt-2 text-slate-600 dark:text-slate-300">Manage your warehouse inventory and stock levels</p>
         </div>
         <Button
-          className="flex items-center space-x-2"
+          className="flex items-center space-x-2 text-white shadow-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-emerald-500/50"
           onClick={() => setShowAddForm(true)}
         >
           <Plus className="w-4 h-4" />
@@ -171,75 +175,75 @@ export function InventoryList() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card className="p-6">
+        <Card className="p-6 transition-shadow border-slate-200 dark:border-slate-700 hover:shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">{inventoryItems.length}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Items</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{inventoryItems.length}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Package className="w-6 h-6 text-blue-600" />
+            <div className="p-3 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30">
+              <Package className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
           <div className="flex items-center mt-4 text-sm">
-            <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
-            <span className="text-green-600">+12% from last month</span>
+            <TrendingUp className="w-4 h-4 mr-1 text-emerald-500" />
+            <span className="text-emerald-600 dark:text-emerald-400">+12% from last month</span>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 transition-shadow border-slate-200 dark:border-slate-700 hover:shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-              <p className="text-2xl font-bold text-yellow-600">{lowStockItems.length}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Low Stock Items</p>
+              <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{lowStockItems.length}</p>
             </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <AlertTriangle className="w-6 h-6 text-yellow-600" />
+            <div className="p-3 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
+              <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
           <div className="flex items-center mt-4 text-sm">
-            <span className="text-gray-600">Requires attention</span>
+            <span className="text-slate-600 dark:text-slate-400">Requires attention</span>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 transition-shadow border-slate-200 dark:border-slate-700 hover:shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-              <p className="text-2xl font-bold text-red-600">{outOfStockItems.length}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Out of Stock</p>
+              <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">{outOfStockItems.length}</p>
             </div>
-            <div className="p-3 bg-red-100 rounded-full">
-              <TrendingDown className="w-6 h-6 text-red-600" />
+            <div className="p-3 rounded-full bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-900/30 dark:to-red-900/30">
+              <TrendingDown className="w-6 h-6 text-rose-600 dark:text-rose-400" />
             </div>
           </div>
           <div className="flex items-center mt-4 text-sm">
-            <span className="text-red-600">Immediate action needed</span>
+            <span className="text-rose-600 dark:text-rose-400">Immediate action needed</span>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 transition-shadow border-slate-200 dark:border-slate-700 hover:shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Value</p>
-              <p className="text-2xl font-bold text-gray-900">${totalInventoryValue}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Value</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">${totalInventoryValue.toFixed(2)}</p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+            <div className="p-3 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
+              <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
           <div className="flex items-center mt-4 text-sm">
-            <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
-            <span className="text-green-600">+8% from last month</span>
+            <TrendingUp className="w-4 h-4 mr-1 text-emerald-500" />
+            <span className="text-emerald-600 dark:text-emerald-400">+8% from last month</span>
           </div>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="p-6">
+      <Card className="p-6 border-slate-200 dark:border-slate-700">
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 md:space-x-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+              <Search className="absolute w-5 h-5 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 left-3 top-1/2" />
               <Input
                 type="text"
                 placeholder="Search by name or SKU..."
@@ -254,7 +258,7 @@ export function InventoryList() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 bg-white border rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="all">All Categories</option>
               <option value="Electronics">Electronics</option>
@@ -265,7 +269,7 @@ export function InventoryList() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 bg-white border rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="all">All Status</option>
               <option value="in-stock">In Stock</option>
@@ -282,78 +286,78 @@ export function InventoryList() {
       </Card>
 
       {/* Inventory Table */}
-      <Card>
+      <Card className="border-slate-200 dark:border-slate-700">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-gray-200 bg-gray-50">
+            <thead className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
               <tr>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   Product
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   SKU
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   Category
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   Quantity
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   Status
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   Location
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-500 dark:text-slate-400">
                   Price
                 </th>
-                <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
+                <th className="px-6 py-3 text-xs font-medium tracking-wider text-right uppercase text-slate-500 dark:text-slate-400">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y dark:bg-slate-900 divide-slate-200 dark:divide-slate-700">
               {filteredInventory.map((item) => (
-                <tr key={item.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-gray-100">
+                <tr key={item.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex items-center justify-center w-10 h-10 mr-3 bg-gray-200 rounded-lg">
-                        <Package className="w-5 h-5 text-gray-500" />
+                      <div className="flex items-center justify-center w-10 h-10 mr-3 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30">
+                        <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{item.product_name}</div>
-                        <div className="text-sm text-gray-500">Updated {item.updated_at}</div>
+                        <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{item.product_name}</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400">Updated {new Date(item.updated_at).toLocaleDateString()}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                     {item.sku}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                     {item.category}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                     {item.quantity_available}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                       {getStatusIcon(item.status)}
                       <span className="ml-1 capitalize">{item.status.replace('-', ' ')}</span>
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                     {item.location}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">
-                    ${item.unit_price}
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                    ${parseFloat(item.unit_price.toString()).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                     <div className="flex items-center justify-end space-x-2">
-                      <Button onClick={() => handleProductEdit(item.id)} variant="ghost" size="sm">
+                      <Button onClick={() => handleProductEdit(item.id)} variant="ghost" size="sm" className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400">
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -366,9 +370,9 @@ export function InventoryList() {
 
         {filteredInventory.length === 0 && (
           <div className="py-12 text-center">
-            <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <h3 className="mb-2 text-lg font-medium text-gray-900">No inventory items found</h3>
-            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+            <Package className="w-12 h-12 mx-auto mb-4 text-slate-400 dark:text-slate-500" />
+            <h3 className="mb-2 text-lg font-medium text-slate-900 dark:text-slate-100">No inventory items found</h3>
+            <p className="text-slate-600 dark:text-slate-400">Try adjusting your search or filter criteria</p>
           </div>
         )}
       </Card>
