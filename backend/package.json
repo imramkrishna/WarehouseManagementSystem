@@ -30,6 +30,5 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "prisma": "^6.18.0"
   }
 }

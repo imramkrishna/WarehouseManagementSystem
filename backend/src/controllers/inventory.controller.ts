@@ -7,6 +7,5 @@ async function inventory(req: Request, res: Response) {
         message: "Inventory accessed successfully",
         items: inventoryItems.rows
     });
-
 }
 export default inventory;
